@@ -1,5 +1,7 @@
 package com.mcp.ochess.game;
 
+import com.mcp.ochess.exceptions.OChessBaseException;
+
 public abstract class Piece {
     Position position;
     PieceKind kind;
@@ -63,6 +65,10 @@ public abstract class Piece {
         isAlive = false;
     }
 
+    protected Side oppositeSide() {
+        return side == Side.Black ? Side.White : Side.Black;
+    }
+
     abstract boolean isValidMove(Position to);
     abstract boolean threatens(Position target);
 }
@@ -75,11 +81,13 @@ class Pawn extends Piece {
     }
 
     @Override
-    protected boolean isValidMove(Board board, Position to) {
+    protected boolean isValidMove(Position to) {
         int dif = side == Side.White ? 1 : -1;
+        int doubleJumpLoc = side == Side.White ? 2 : 7;
+
         Piece piece = board.getPiece(to);
 
-        if (threatens(board, to) && piece != null && piece.getSide() != side) {
+        if (threatens(to) && piece != null && piece.getSide() != side) {
             return true;
         }
 
@@ -87,16 +95,18 @@ class Pawn extends Piece {
             return false;
         }
 
-        return position.getRow() + dif == to.getRow();
+        return position.getRow() + dif == to.getRow() ||
+                (position.getRow() == doubleJumpLoc && position.getRow() + dif * 2 == to.getRow());
     }
 
     @Override
-    boolean threatens(Board board, Position target) {
+    boolean threatens(Position target) {
         int dif = side == Side.White ? 1 : -1;
 
         if (position.getRow() == target.getRow() + dif && Math.abs(position.getColumn() - target.getColumn()) == 1) {
-            
+
         }
+
         return false;
     }
 }
@@ -108,9 +118,14 @@ class Knight extends Piece {
     }
 
     @Override
-    boolean isValidMove(Board board, Position to) {
+    boolean isValidMove(Position to) {
         // Simple logic here, either it should go two rows up/down and 1 left/right or vice-a-versa.
         return (Math.abs(position.getRow() - to.getRow()) + Math.abs(position.getColumn() - to.getColumn())) == 3;
+    }
+
+    @Override
+    boolean threatens(Position target) {
+        return isValidMove(target);
     }
 }
 
@@ -121,8 +136,35 @@ class Bishop extends Piece {
     }
 
     @Override
-    boolean isValidMove(Board board, Position to) {
-        return Math.abs(position.getColumn() - to.getColumn()) == Math.abs(position.getRow() - to.getRow());
+    boolean isValidMove(Position to) {
+        int colDif = to.getColumn() > position.getColumn() ? 1 : -1;
+        int rowDif = to.getRow() > position.getRow() ? 1 : -1;
+
+        return tryMove(position, colDif, rowDif, to);
+    }
+
+    public boolean tryMove(Position current, int colDif, int rowDif, Position target) {
+        try {
+            Position newPosition = new Position(current.getColumn() + colDif, current.getRow() + rowDif);
+            Piece piece = board.getPiece(newPosition);
+
+            if (piece != null && piece.getSide() == side) {
+                return false;
+            }
+
+            if (newPosition.equals(target)) {
+                return true;
+            }
+
+            return tryMove(newPosition, colDif, rowDif, target);
+        } catch (OChessBaseException ex) {
+            return false;
+        }
+    }
+
+    @Override
+    boolean threatens(Position target) {
+        return isValidMove(target);
     }
 }
 
@@ -133,8 +175,42 @@ class Rook extends Piece {
     }
 
     @Override
-    boolean isValidMove(Board board, Position to) {
-        return to.getRow() == position.getRow() || to.getColumn() == position.getColumn();
+    boolean isValidMove(Position to) {
+        if (position.getRow() != to.getRow() && position.getColumn() != to.getColumn()) {
+            return false;
+        }
+
+        boolean rowsEqual = to.getRow() == position.getRow();
+
+        int max = rowsEqual
+                ? Math.max(position.getColumn(), to.getColumn())
+                : Math.max(position.getRow(), to.getRow());
+
+        int min = rowsEqual
+                ? Math.min(position.getColumn(), to.getColumn())
+                : Math.min(position.getRow(), to.getRow());
+
+        for (int from = min; from < max - 1; from++) {
+            try {
+                Position pos = rowsEqual
+                        ? new Position(to.getColumn(), from)
+                        : new Position(from, to.getRow());
+
+                if (board.isOccupied(pos)) {
+                    return false;
+                }
+            } catch (OChessBaseException e) {
+                return false;
+            }
+        }
+
+        Piece piece = board.getPiece(to);
+        return piece == null || piece.getSide() == oppositeSide();
+    }
+
+    @Override
+    boolean threatens(Position target) {
+        return isValidMove(target);
     }
 }
 
@@ -143,12 +219,40 @@ class Queen extends Piece {
         super(board, position, side);
         kind = PieceKind.Queen;
     }
+
+    @Override
+    boolean isValidMove(Position to) {
+        if (to.getColumn() == position.getColumn() || to.getRow() == position.getRow()) {
+            return Piece.createRook(board, to, side).isValidMove(to);
+        }
+
+        return Piece.createBishop(board, to, side).isValidMove(to);
+    }
+
+    @Override
+    boolean threatens(Position target) {
+        return isValidMove(target);
+    }
 }
 
 class King extends Piece {
     King(Board board, Position position, Side side) {
         super(board, position, side);
         kind = PieceKind.King;
+    }
+
+    @Override
+    boolean isValidMove(Position to) {
+        if (board.isCellThreatened(to, oppositeSide())) {
+            return false;
+        }
+
+        return Math.abs(to.getRow() - position.getRow()) == 1 && Math.abs(to.getColumn() - position.getColumn()) == 1;
+    }
+
+    @Override
+    boolean threatens(Position target) {
+        return isValidMove(target);
     }
 }
 

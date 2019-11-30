@@ -47,7 +47,7 @@ public class Board {
         layout.put(Position.fromString("H7"), Piece.createPawn(this, Position.fromString("H7"), Side.Black));
     }
 
-    public boolean isThreatenedBy(Position position, Side side) {
+    public boolean isCellThreatened(Position position, Side side) {
         boolean oneThreatens = false;
 
         for (Piece p: layout.values()) {
