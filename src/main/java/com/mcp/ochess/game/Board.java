@@ -10,6 +10,18 @@ public class Board {
 
     private Piece whiteKing;
     private Piece blackKing;
+    private boolean testing;
+
+    // Castling checks
+    private boolean whiteKingMoved = false;
+    private boolean whiteLeftRookMoved = false;
+    private boolean whiteRightRookMoved = false;
+    private boolean blackKingMoved = false;
+    private boolean blackLeftRookMoved = false;
+    private boolean blackRightRookMoved = false;
+
+    // En passant enabled boxes use class for better readability
+    private ArrayList<EnPassantDesc> enPassantEnabledPositions = new ArrayList<>();
 
     public Board() throws OChessBaseException {
         whiteKing = Piece.createKing(this, Position.fromString("E1"), Side.White);
@@ -66,21 +78,64 @@ public class Board {
         return layout.get(pos);
     }
 
-    public MoveResultStatus move(Position from, Position to) {
+    // todo return the destroyed pieces, need it in the front end
+    public MoveResultStatus move(Position from, Position to) throws OChessBaseException {
         Piece piece = getPiece(from);
 
         if (piece == null) {
             return MoveResultStatus.PIECE_DOES_NOT_EXIST;
         }
 
-        if (! piece.isValidMove(to)) {
+        boolean castlingMove = checkCastlingPossible(from, to);
+        EnPassantDesc enPassantMove = null;
+
+        if (piece.getKind() == PieceKind.Pawn) {
+            for (EnPassantDesc desc : enPassantEnabledPositions) {
+                if (from.equals(desc.enabledPawn) && to.equals(desc.movedPawnPrevLoc)) {
+                    enPassantMove = desc;
+                }
+            }
+        }
+
+        if (! piece.isValidMove(to) && enPassantMove == null && !castlingMove) {
             return MoveResultStatus.INVALID_MOVE;
+        }
+
+        if (castlingMove) {
+            moveCastlingPieces(from, to);
+            return MoveResultStatus.CASTLING_MOVE;
+        }
+
+        Piece tempToPiece = layout.get(to);
+        if (enPassantMove != null) {
+            tempToPiece = layout.get(enPassantMove.movedPawnNewLoc);
+            layout.remove(enPassantMove.movedPawnNewLoc);
         }
 
         Piece occupied = getPiece(to);
 
         layout.remove(from);
         layout.put(to, piece);
+        piece.moveTo(to);
+
+        if (tryCheckMate(piece.getSide())) {
+            // Revert to last state
+            layout.put(to, tempToPiece);
+            piece.moveToNoCheck(from);
+            layout.put(from, piece);
+
+            return MoveResultStatus.INVALID_MOVE_KING_THREATENED;
+        }
+
+        // Handle pawn transform
+        if (piece.getKind() == PieceKind.Pawn && (
+                (piece.getSide() == Side.Black && piece.getPosition().getRow() == 1) || // black reaches 1st row
+                        (piece.getSide() == Side.White && piece.getPosition().getRow() == 8) // white reaches 8th row
+        )) {
+            return MoveResultStatus.PAWN_TRANSFORM;
+        }
+
+        populateEnPassant(piece, to);
 
         if (occupied != null) {
             return occupied.getKind() == PieceKind.King ?
@@ -147,6 +202,113 @@ public class Board {
         return false;
     }
 
+    public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
+        Side side = layout.get(pawnPos).getSide();
+
+        switch (transformTo) {
+            case Pawn:
+                throw new OChessBaseException("Stupid transform.");
+            case Rook:
+                // why
+                layout.put(pawnPos, Piece.createRook(this, pawnPos, side));
+                break;
+            case Knight:
+                layout.put(pawnPos, Piece.createKnight(this, pawnPos, side));
+                break;
+            case Bishop:
+                // why
+                layout.put(pawnPos, Piece.createBishop(this, pawnPos, side));
+                break;
+            case Queen:
+                layout.put(pawnPos, Piece.createQueen(this, pawnPos, side));
+                break;
+            case King:
+                throw new OChessBaseException("Very funny.");
+        }
+    }
+
+    private boolean checkCastlingPossible(Position from, Position to) throws OChessBaseException {
+        Piece piece = layout.get(from);
+
+        if (piece == null) {
+            return false;
+        }
+
+        if (piece.getSide() == Side.White && whiteKingMoved) {
+            return false;
+        }
+
+        if (piece.getSide() == Side.Black && blackKingMoved) {
+            return false;
+        }
+
+        int[] requiredSafeCells = null;
+        boolean relativeRookMoved = false;
+
+        if (to.getColumn() == 7) {
+            requiredSafeCells = new int[] { 6, 7 };
+            relativeRookMoved = piece.getSide() == Side.White ? whiteRightRookMoved : whiteLeftRookMoved;
+        } else if (to.getColumn() == 3) {
+            requiredSafeCells = new int[] { 2, 3, 4 };
+            relativeRookMoved = piece.getSide() == Side.White ? blackRightRookMoved : blackLeftRookMoved;
+        }
+
+        if (relativeRookMoved) {
+            return false;
+        }
+        boolean anyOccupiedOrThreatened = false;
+
+        for (int requiredSafeCell: requiredSafeCells) {
+            Position pos = new Position(requiredSafeCell, to.getRow());
+            if (isOccupied(pos) || isCellThreatened(pos, opposite(piece.getSide()))) {
+                anyOccupiedOrThreatened = true;
+            }
+        }
+
+        return !anyOccupiedOrThreatened && !isCellThreatened(piece.getPosition(), opposite(piece.getSide()));
+    }
+
+    private void moveCastlingPieces(Position from, Position to) throws OChessBaseException {
+        Piece piece = layout.get(from);
+        layout.put(to, piece);
+        layout.remove(from);
+
+        int row = piece.getSide() == Side.White ? 1 : 8;
+        int rookCol = to.getColumn() == 3 ? 1 : 8;
+
+        Position rookPos = new Position(rookCol, row);
+        Piece rook = layout.get(rookPos);
+
+        layout.remove(rookPos);
+        layout.put(new Position(to.getColumn() == 3 ? 4 : 6, piece.getPosition().getRow()), rook);
+    }
+
+    private void populateEnPassant(Piece piece, Position to) throws OChessBaseException {
+        if (piece.getKind() == PieceKind.Pawn && Math.abs(piece.getPosition().getRow() -  to.getRow()) == 2) {
+            Piece leftPawn = null;
+            try {
+                leftPawn = layout.get(new Position(to.getColumn()  - 1, to.getRow()));
+            } catch (OChessBaseException ignored) {}
+            Piece rightPawn = null;
+            try {
+                rightPawn = layout.get(new Position(to.getColumn()  + 1, to.getRow()));
+            } catch (OChessBaseException ignored) {}
+
+            createEnPassantDesc(piece, to, rightPawn);
+            createEnPassantDesc(piece, to, leftPawn);
+        }
+    }
+
+    private void createEnPassantDesc(Piece piece, Position to, Piece leftPawn) throws OChessBaseException {
+        if (leftPawn != null && leftPawn.getKind() == PieceKind.Pawn) {
+            EnPassantDesc enPassantDesc = new EnPassantDesc();
+            enPassantDesc.enabledPawn = leftPawn.getPosition();
+            enPassantDesc.movedPawnPrevLoc = new Position(piece.getPosition().getColumn(), to.getRow() - getDirection(piece.getSide()));
+            enPassantDesc.movedPawnNewLoc = to;
+            enPassantEnabledPositions.add(enPassantDesc);
+        }
+    }
+
     private boolean tryBishopCheckMate(Position threatPos, Piece king) throws OChessBaseException {
         int colDif = threatPos.getColumn() > king.getPosition().getColumn() ? 1 : -1;
         int rowDif = threatPos.getRow() > king.getPosition().getRow() ? 1 : -1;
@@ -205,4 +367,27 @@ public class Board {
     private Side opposite(Side side) {
         return side == Side.White ? Side.Black : Side.White;
     }
+
+    private int getDirection(Side side) {
+        return side == Side.White ? 1 : -1;
+    }
+
+    // TESTING
+    public Board(boolean testing) {
+        this.testing = testing;
+    }
+
+    public void addTestingPiece(Piece piece) {
+        if (testing) {
+            layout.put(piece.getPosition(), piece);
+        }
+    }
+
+    //--
+}
+
+class EnPassantDesc {
+    Position enabledPawn;
+    Position movedPawnPrevLoc;
+    Position movedPawnNewLoc;
 }

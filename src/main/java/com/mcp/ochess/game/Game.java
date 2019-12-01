@@ -1,7 +1,6 @@
 package com.mcp.ochess.game;
 
 import com.mcp.ochess.exceptions.OChessBaseException;
-import com.mcp.ochess.model.MoveResult;
 
 import java.util.HashMap;
 
@@ -49,10 +48,19 @@ public class Game {
 
         MoveResultStatus status = board.move(Position.fromString(from), Position.fromString(to));
 
+        if (status == MoveResultStatus.PAWN_TRANSFORM) {
+            // wait for transform
+            return MoveResultStatus.PAWN_TRANSFORM;
+        }
+
         if (board.tryCheckMate(turn)) {
             return MoveResultStatus.CHECKMATE;
         }
 
         return status;
+    }
+
+    public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
+        board.transformPawn(pawnPos, transformTo);
     }
 }

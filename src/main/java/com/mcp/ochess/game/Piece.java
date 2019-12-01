@@ -52,13 +52,17 @@ public abstract class Piece {
         return isAlive;
     }
 
-    public boolean moveTo(Board board, Position to) {
+    public boolean moveTo(Position to) {
         if (! isValidMove(to)) {
             return false;
         }
 
         position = to;
         return true;
+    }
+
+    public void moveToNoCheck(Position to) {
+        position = to;
     }
 
     public void kill() {
@@ -99,6 +103,8 @@ class Pawn extends Piece {
             return false;
         }
 
+
+
         return position.getRow() + dif == to.getRow() ||
                 (position.getRow() == doubleJumpLoc && position.getRow() + dif * 2 == to.getRow());
     }
@@ -106,12 +112,7 @@ class Pawn extends Piece {
     @Override
     boolean threatens(Position target) {
         int dif = side == Side.White ? 1 : -1;
-
-        if (position.getRow() == target.getRow() + dif && Math.abs(position.getColumn() - target.getColumn()) == 1) {
-
-        }
-
-        return false;
+        return position.getRow() == target.getRow() + dif && Math.abs(position.getColumn() - target.getColumn()) == 1;
     }
 }
 
