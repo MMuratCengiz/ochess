@@ -65,11 +65,15 @@ public abstract class Piece {
         isAlive = false;
     }
 
+    public Position getPosition() {
+        return position;
+    }
+
     protected Side oppositeSide() {
         return side == Side.Black ? Side.White : Side.Black;
     }
-
     abstract boolean isValidMove(Position to);
+
     abstract boolean threatens(Position target);
 }
 
