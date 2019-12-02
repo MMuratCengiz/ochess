@@ -6,12 +6,10 @@ public abstract class Piece {
     Position position;
     PieceKind kind;
     Side side;
-    boolean isAlive;
     Board board;
 
     Piece(Board board, Position position, Side side) {
         this.position = position;
-        this.isAlive = false;
         this.side = side;
         this.board = board;
     }
@@ -48,10 +46,6 @@ public abstract class Piece {
         return kind;
     }
 
-    public boolean isAlive() {
-        return isAlive;
-    }
-
     public boolean moveTo(Position to) {
         if (! isValidMove(to)) {
             return false;
@@ -63,10 +57,6 @@ public abstract class Piece {
 
     public void moveToNoCheck(Position to) {
         position = to;
-    }
-
-    public void kill() {
-        isAlive = false;
     }
 
     public Position getPosition() {

@@ -1,6 +1,7 @@
 import com.mcp.ochess.exceptions.OChessBaseException;
 import com.mcp.ochess.exceptions.OChessNetException;
 import com.mcp.ochess.game.*;
+import com.mcp.ochess.model.MoveResult;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -155,14 +156,14 @@ public class PiecesTest extends TestCase {
         Board board = new Board(true);
         board.addTestingPiece(Piece.createRook(board, Position.fromString("A1"), Side.White));
 
-        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A7"));
 
-        assertTrue(board.isOccupied(Position.fromString("A8")));
+        assertTrue(board.isOccupied(Position.fromString("A7")));
         assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
 
-        status = board.move(Position.fromString("A8"), Position.fromString("H8"));
+        status = board.move(Position.fromString("A7"), Position.fromString("H7"));
 
-        assertTrue(board.isOccupied(Position.fromString("H8")));
+        assertTrue(board.isOccupied(Position.fromString("H7")));
         assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
     }
 
@@ -170,11 +171,11 @@ public class PiecesTest extends TestCase {
     public void testRookCapture() throws OChessBaseException {
         Board board = new Board(true);
         board.addTestingPiece(Piece.createRook(board, Position.fromString("A1"), Side.White));
-        board.addTestingPiece(Piece.createRook(board, Position.fromString("A8"), Side.Black));
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A7"), Side.Black));
 
-        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A7"));
 
-        assertTrue(board.isOccupied(Position.fromString("A8")));
+        assertTrue(board.isOccupied(Position.fromString("A7")));
         assertEquals(status, MoveResultStatus.KILL);
     }
 
@@ -269,5 +270,15 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("B2"));
 
         assertEquals(status, MoveResultStatus.INVALID_MOVE);
+    }
+
+    @Test
+    public void testCheck() throws OChessBaseException {
+        Board board = new Board(true);
+
+        board.addTestingPiece(Piece.createBishop(board, Position.fromString("E6"), Side.White));
+        MoveResultStatus status = board.move(Position.fromString("E6"), Position.fromString("D7"));
+
+        assertEquals(status, MoveResultStatus.CHECK);
     }
 }

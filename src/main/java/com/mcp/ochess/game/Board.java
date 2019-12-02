@@ -67,8 +67,8 @@ public class Board {
         layout.put(Position.fromString("H7"), Piece.createPawn(this, Position.fromString("H7"), Side.Black));
     }
 
-    public boolean isCellThreatened(Position position, Side side) {
-        return threateningPieces(position, side).size() > 0;
+    public boolean isCellThreatened(Position position, Side threatenedBy) {
+        return threateningPieces(position, threatenedBy).size() > 0;
     }
 
     public boolean isOccupied(Position position) {
@@ -145,9 +145,12 @@ public class Board {
         }
 
         if (occupied != null) {
-            return occupied.getKind() == PieceKind.King ?
-                    MoveResultStatus.CHECK :
-                    MoveResultStatus.KILL;
+            return MoveResultStatus.KILL;
+        }
+
+        if ((piece.getSide() == Side.White && isCellThreatened(blackKing.getPosition(), piece.getSide())) ||
+                (piece.getSide() == Side.Black && isCellThreatened(whiteKing.getPosition(), piece.getSide()))) {
+            return MoveResultStatus.CHECK;
         }
 
         if (enPassantMove != null) {
@@ -160,7 +163,7 @@ public class Board {
     public boolean tryCheckMate(Side side) throws OChessBaseException {
         Piece king = side == Side.White ? whiteKing : blackKing;
 
-        ArrayList<Piece> threateningPieces = threateningPieces(king.getPosition(), side);
+        ArrayList<Piece> threateningPieces = threateningPieces(king.getPosition(), opposite(side));
 
         // 0 == col, 1 == row
         int[][] moveTries = new int[][] {
@@ -366,14 +369,12 @@ public class Board {
         return true;
     }
 
-    private ArrayList<Piece> threateningPieces(Position position, Side side) {
+    private ArrayList<Piece> threateningPieces(Position position, Side threatenedBy) {
         ArrayList<Piece> pieces = new ArrayList<>();
 
         for (Piece p: layout.values()) {
-            if (p.isAlive() && p.getSide() != side) {
-                if (p.threatens(position)) {
-                    pieces.add(p);
-                }
+            if (p.getKind() != PieceKind.King && p.getSide() == threatenedBy && p.threatens(position)) {
+                pieces.add(p);
             }
         }
 
@@ -394,6 +395,9 @@ public class Board {
 
         whiteKing = Piece.createKing(this, Position.fromString("E1"), Side.White);
         blackKing = Piece.createKing(this, Position.fromString("E8"), Side.Black);
+
+        layout.put(whiteKing.getPosition(), whiteKing);
+        layout.put(blackKing.getPosition(), blackKing);
     }
 
     public void addTestingPiece(Piece piece) {
