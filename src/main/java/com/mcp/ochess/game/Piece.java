@@ -25,7 +25,7 @@ public abstract class Piece {
     }
 
     public static Piece createKnight(Board board, Position position, Side side) {
-        return new Pawn(board, position, side);
+        return new Knight(board, position, side);
     }
 
     public static Piece createBishop(Board board, Position position, Side side) {
@@ -103,8 +103,6 @@ class Pawn extends Piece {
             return false;
         }
 
-
-
         return position.getRow() + dif == to.getRow() ||
                 (position.getRow() == doubleJumpLoc && position.getRow() + dif * 2 == to.getRow());
     }
@@ -112,7 +110,7 @@ class Pawn extends Piece {
     @Override
     boolean threatens(Position target) {
         int dif = side == Side.White ? 1 : -1;
-        return position.getRow() == target.getRow() + dif && Math.abs(position.getColumn() - target.getColumn()) == 1;
+        return position.getRow() + dif == target.getRow() && Math.abs(position.getColumn() - target.getColumn()) == 1;
     }
 }
 
@@ -153,12 +151,16 @@ class Bishop extends Piece {
             Position newPosition = new Position(current.getColumn() + colDif, current.getRow() + rowDif);
             Piece piece = board.getPiece(newPosition);
 
-            if (piece != null && piece.getSide() == side) {
+            if (piece != null && !newPosition.equals(target)) {
                 return false;
             }
 
-            if (newPosition.equals(target)) {
+            if (newPosition.equals(target) && piece.getSide() != side) {
                 return true;
+            }
+
+            if (newPosition.equals(target)) { // Moving to cell with an ally piece
+                return false;
             }
 
             return tryMove(newPosition, colDif, rowDif, target);

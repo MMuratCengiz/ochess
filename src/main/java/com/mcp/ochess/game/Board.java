@@ -19,6 +19,7 @@ public class Board {
     private boolean blackKingMoved = false;
     private boolean blackLeftRookMoved = false;
     private boolean blackRightRookMoved = false;
+    private boolean awaitingPawnTransform = false;
 
     // En passant enabled boxes use class for better readability
     private ArrayList<EnPassantDesc> enPassantEnabledPositions = new ArrayList<>();
@@ -80,6 +81,10 @@ public class Board {
 
     // todo return the destroyed pieces, need it in the front end
     public MoveResultStatus move(Position from, Position to) throws OChessBaseException {
+        if (awaitingPawnTransform) {
+            throw new OChessBaseException("Transform the pawn before continuing to move.");
+        }
+
         Piece piece = getPiece(from);
 
         if (piece == null) {
@@ -95,6 +100,7 @@ public class Board {
                     enPassantMove = desc;
                 }
             }
+            enPassantEnabledPositions.clear();
         }
 
         if (! piece.isValidMove(to) && enPassantMove == null && !castlingMove) {
@@ -112,11 +118,13 @@ public class Board {
             layout.remove(enPassantMove.movedPawnNewLoc);
         }
 
+        populateEnPassant(piece, to);
+
         Piece occupied = getPiece(to);
+        piece.moveTo(to);
 
         layout.remove(from);
         layout.put(to, piece);
-        piece.moveTo(to);
 
         if (tryCheckMate(piece.getSide())) {
             // Revert to last state
@@ -132,10 +140,9 @@ public class Board {
                 (piece.getSide() == Side.Black && piece.getPosition().getRow() == 1) || // black reaches 1st row
                         (piece.getSide() == Side.White && piece.getPosition().getRow() == 8) // white reaches 8th row
         )) {
+            awaitingPawnTransform = true;
             return MoveResultStatus.PAWN_TRANSFORM;
         }
-
-        populateEnPassant(piece, to);
 
         if (occupied != null) {
             return occupied.getKind() == PieceKind.King ?
@@ -143,6 +150,9 @@ public class Board {
                     MoveResultStatus.KILL;
         }
 
+        if (enPassantMove != null) {
+            return MoveResultStatus.EN_PASSANT_MOVE;
+        }
 
         return MoveResultStatus.MOVED_TO_EMPTY;
     }
@@ -203,6 +213,10 @@ public class Board {
     }
 
     public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
+        if (! awaitingPawnTransform) {
+            throw new OChessBaseException("Invalid transform call.");
+        }
+
         Side side = layout.get(pawnPos).getSide();
 
         switch (transformTo) {
@@ -230,7 +244,7 @@ public class Board {
     private boolean checkCastlingPossible(Position from, Position to) throws OChessBaseException {
         Piece piece = layout.get(from);
 
-        if (piece == null) {
+        if (piece == null || piece.getKind() != PieceKind.King) {
             return false;
         }
 
@@ -251,6 +265,8 @@ public class Board {
         } else if (to.getColumn() == 3) {
             requiredSafeCells = new int[] { 2, 3, 4 };
             relativeRookMoved = piece.getSide() == Side.White ? blackRightRookMoved : blackLeftRookMoved;
+        } else {
+            return false;
         }
 
         if (relativeRookMoved) {
@@ -299,10 +315,10 @@ public class Board {
         }
     }
 
-    private void createEnPassantDesc(Piece piece, Position to, Piece leftPawn) throws OChessBaseException {
-        if (leftPawn != null && leftPawn.getKind() == PieceKind.Pawn) {
+    private void createEnPassantDesc(Piece piece, Position to, Piece adjacentPawn) throws OChessBaseException {
+        if (adjacentPawn != null && adjacentPawn.getKind() == PieceKind.Pawn) {
             EnPassantDesc enPassantDesc = new EnPassantDesc();
-            enPassantDesc.enabledPawn = leftPawn.getPosition();
+            enPassantDesc.enabledPawn = adjacentPawn.getPosition();
             enPassantDesc.movedPawnPrevLoc = new Position(piece.getPosition().getColumn(), to.getRow() - getDirection(piece.getSide()));
             enPassantDesc.movedPawnNewLoc = to;
             enPassantEnabledPositions.add(enPassantDesc);
@@ -373,8 +389,11 @@ public class Board {
     }
 
     // TESTING
-    public Board(boolean testing) {
+    public Board(boolean testing) throws OChessBaseException {
         this.testing = testing;
+
+        whiteKing = Piece.createKing(this, Position.fromString("E1"), Side.White);
+        blackKing = Piece.createKing(this, Position.fromString("E8"), Side.Black);
     }
 
     public void addTestingPiece(Piece piece) {
