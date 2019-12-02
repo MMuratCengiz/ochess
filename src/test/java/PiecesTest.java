@@ -149,4 +149,125 @@ public class PiecesTest extends TestCase {
         assertTrue(board.isOccupied(Position.fromString("C3")));
         assertEquals(status, MoveResultStatus.INVALID_MOVE);
     }
+
+    @Test
+    public void testRookMove() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A1"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
+
+        assertTrue(board.isOccupied(Position.fromString("A8")));
+        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+
+        status = board.move(Position.fromString("A8"), Position.fromString("H8"));
+
+        assertTrue(board.isOccupied(Position.fromString("H8")));
+        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+    }
+
+    @Test
+    public void testRookCapture() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A8"), Side.Black));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
+
+        assertTrue(board.isOccupied(Position.fromString("A8")));
+        assertEquals(status, MoveResultStatus.KILL);
+    }
+
+    @Test
+    public void testRookBlocked() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createBishop(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("A7"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
+
+        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+
+        status = board.move(Position.fromString("A1"), Position.fromString("A7"));
+        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+    }
+
+    @Test
+    public void testQueenMove() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createQueen(board, Position.fromString("A1"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("H8"));
+
+        assertTrue(board.isOccupied(Position.fromString("H8")));
+        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+
+        status = board.move(Position.fromString("H8"), Position.fromString("H1"));
+
+        assertTrue(board.isOccupied(Position.fromString("H1")));
+        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+    }
+
+    @Test
+    public void testQueenCapture() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createQueen(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("C3"), Side.Black));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("C8"), Side.Black));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("C3"));
+
+        assertTrue(board.isOccupied(Position.fromString("C3")));
+        assertEquals(status, MoveResultStatus.KILL);
+
+        status = board.move(Position.fromString("C3"), Position.fromString("C8"));
+
+        assertTrue(board.isOccupied(Position.fromString("C8")));
+        assertEquals(status, MoveResultStatus.KILL);
+    }
+
+    @Test
+    public void testQueenBlocked() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createBishop(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("C3"), Side.Black));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("D4"), Side.Black));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("D4"));
+
+        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+    }
+    @Test
+    public void testKingMove() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createKing(board, Position.fromString("A1"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("B2"));
+
+        assertTrue(board.isOccupied(Position.fromString("B2")));
+        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+    }
+
+    @Test
+    public void testKingCapture() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createQueen(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("A2"), Side.Black));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A2"));
+
+        assertTrue(board.isOccupied(Position.fromString("A2")));
+        assertEquals(status, MoveResultStatus.KILL);
+    }
+
+    @Test
+    public void testKingBlocked() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createBishop(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createPawn(board, Position.fromString("B2"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("B2"));
+
+        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+    }
 }

@@ -155,7 +155,7 @@ class Bishop extends Piece {
                 return false;
             }
 
-            if (newPosition.equals(target) && piece.getSide() != side) {
+            if (newPosition.equals(target) && (piece == null || piece.getSide() != side)) {
                 return true;
             }
 
@@ -197,11 +197,11 @@ class Rook extends Piece {
                 ? Math.min(position.getColumn(), to.getColumn())
                 : Math.min(position.getRow(), to.getRow());
 
-        for (int from = min; from < max - 1; from++) {
+        for (int from = min + 1; from < max - 1; from++) {
             try {
                 Position pos = rowsEqual
-                        ? new Position(to.getColumn(), from)
-                        : new Position(from, to.getRow());
+                        ? new Position(from, to.getRow())
+                        : new Position(to.getColumn(), from);
 
                 if (board.isOccupied(pos)) {
                     return false;
@@ -230,10 +230,10 @@ class Queen extends Piece {
     @Override
     boolean isValidMove(Position to) {
         if (to.getColumn() == position.getColumn() || to.getRow() == position.getRow()) {
-            return Piece.createRook(board, to, side).isValidMove(to);
+            return Piece.createRook(board, position, side).isValidMove(to);
         }
 
-        return Piece.createBishop(board, to, side).isValidMove(to);
+        return Piece.createBishop(board, position, side).isValidMove(to);
     }
 
     @Override
