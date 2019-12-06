@@ -150,7 +150,7 @@ public class Board {
 
         if ((piece.getSide() == Side.White && isCellThreatened(blackKing.getPosition(), piece.getSide())) ||
                 (piece.getSide() == Side.Black && isCellThreatened(whiteKing.getPosition(), piece.getSide()))) {
-            return MoveResultStatus.CHECK;
+            return tryCheckMate(opposite(piece.side)) ? MoveResultStatus.CHECKMATE : MoveResultStatus.CHECK;
         }
 
         if (enPassantMove != null) {
@@ -180,7 +180,11 @@ public class Board {
         boolean anyMoveIsValid = false;
 
         for (int[] move: moveTries) {
-            anyMoveIsValid = king.isValidMove(new Position(move[0], move[1]));
+            try {
+                anyMoveIsValid = king.isValidMove(new Position(king.position.getColumn() + move[0], king.position.getRow() + move[1]));
+            } catch (OChessBaseException ignored) {
+                // Position is out of bounds
+            }
         }
 
         if (anyMoveIsValid) {

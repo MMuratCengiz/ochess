@@ -10,7 +10,7 @@ public class Position {
         this.column = column;
         this.row = row;
 
-        if (column > 8 || row > 8) {
+        if (column > 8 || row > 8 || column < 1 || row < 1) {
             throw new OChessBaseException("Requested position is out of bounds.");
         }
     }

@@ -65,7 +65,7 @@ public class PiecesTest extends TestCase {
 
         MoveResultStatus status = board.move(Position.fromString("D2"), Position.fromString("D3"));
 
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
         assertTrue(board.isOccupied(Position.fromString("D3")));
         assertTrue(board.isOccupied(Position.fromString("D2")));
     }
@@ -75,7 +75,7 @@ public class PiecesTest extends TestCase {
         Board board = new Board(true);
         board.addTestingPiece(Piece.createPawn(board, Position.fromString("D2"), Side.White));
         MoveResultStatus status = board.move(Position.fromString("D2"), Position.fromString("D5"));
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class PiecesTest extends TestCase {
 
         assertTrue(!board.isOccupied(Position.fromString("E5")));
         assertTrue(board.isOccupied(Position.fromString("E6")));
-        assertEquals(status, MoveResultStatus.EN_PASSANT_MOVE);
+        assertEquals(MoveResultStatus.EN_PASSANT_MOVE, status);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("B1"), Position.fromString("C3"));
 
         assertTrue(board.isOccupied(Position.fromString("C3")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.MOVED_TO_EMPTY, status);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("C3"), Position.fromString("E2"));
 
         assertTrue(board.isOccupied(Position.fromString("E2")));
-        assertEquals(status, MoveResultStatus.KILL);
+        assertEquals(MoveResultStatus.KILL, status);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("H8"));
 
         assertTrue(board.isOccupied(Position.fromString("H8")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.MOVED_TO_EMPTY, status);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("C3"));
 
         assertTrue(board.isOccupied(Position.fromString("C3")));
-        assertEquals(status, MoveResultStatus.KILL);
+        assertEquals(MoveResultStatus.KILL, status);
     }
 
     @Test
@@ -148,7 +148,7 @@ public class PiecesTest extends TestCase {
 
         assertTrue(board.isOccupied(Position.fromString("A1")));
         assertTrue(board.isOccupied(Position.fromString("C3")));
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
     }
 
     @Test
@@ -159,12 +159,12 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A7"));
 
         assertTrue(board.isOccupied(Position.fromString("A7")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.MOVED_TO_EMPTY, status);
 
         status = board.move(Position.fromString("A7"), Position.fromString("H7"));
 
         assertTrue(board.isOccupied(Position.fromString("H7")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.MOVED_TO_EMPTY, status);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A7"));
 
         assertTrue(board.isOccupied(Position.fromString("A7")));
-        assertEquals(status, MoveResultStatus.KILL);
+        assertEquals(MoveResultStatus.KILL, status);
     }
 
     @Test
@@ -187,10 +187,10 @@ public class PiecesTest extends TestCase {
 
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
 
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
 
         status = board.move(Position.fromString("A1"), Position.fromString("A7"));
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
     }
 
     @Test
@@ -201,12 +201,12 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("H8"));
 
         assertTrue(board.isOccupied(Position.fromString("H8")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.CHECK, status);
 
         status = board.move(Position.fromString("H8"), Position.fromString("H1"));
 
         assertTrue(board.isOccupied(Position.fromString("H1")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.MOVED_TO_EMPTY, status);
     }
 
     @Test
@@ -219,12 +219,12 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("C3"));
 
         assertTrue(board.isOccupied(Position.fromString("C3")));
-        assertEquals(status, MoveResultStatus.KILL);
+        assertEquals(MoveResultStatus.KILL, status);
 
         status = board.move(Position.fromString("C3"), Position.fromString("C8"));
 
         assertTrue(board.isOccupied(Position.fromString("C8")));
-        assertEquals(status, MoveResultStatus.KILL);
+        assertEquals(MoveResultStatus.KILL, status);
     }
 
     @Test
@@ -236,7 +236,7 @@ public class PiecesTest extends TestCase {
 
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("D4"));
 
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
     }
     @Test
     public void testKingMove() throws OChessBaseException {
@@ -246,7 +246,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("B2"));
 
         assertTrue(board.isOccupied(Position.fromString("B2")));
-        assertEquals(status, MoveResultStatus.MOVED_TO_EMPTY);
+        assertEquals(MoveResultStatus.MOVED_TO_EMPTY, status);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class PiecesTest extends TestCase {
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A2"));
 
         assertTrue(board.isOccupied(Position.fromString("A2")));
-        assertEquals(status, MoveResultStatus.KILL);
+        assertEquals(MoveResultStatus.KILL, status);
     }
 
     @Test
@@ -269,7 +269,7 @@ public class PiecesTest extends TestCase {
 
         MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("B2"));
 
-        assertEquals(status, MoveResultStatus.INVALID_MOVE);
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
     }
 
     @Test
@@ -279,6 +279,58 @@ public class PiecesTest extends TestCase {
         board.addTestingPiece(Piece.createBishop(board, Position.fromString("E6"), Side.White));
         MoveResultStatus status = board.move(Position.fromString("E6"), Position.fromString("D7"));
 
-        assertEquals(status, MoveResultStatus.CHECK);
+        assertEquals(MoveResultStatus.CHECK, status);
+    }
+
+    @Test
+    public void testCastlingWhite1() throws OChessBaseException {
+        Board board = new Board(true);
+
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A1"), Side.White));
+        MoveResultStatus status = board.move(Position.fromString("E1"), Position.fromString("C1"));
+
+        assertEquals(MoveResultStatus.CASTLING_MOVE, status);
+    }
+
+    @Test
+    public void testCastlingWhite2() throws OChessBaseException {
+        Board board = new Board(true);
+
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("H1"), Side.White));
+        MoveResultStatus status = board.move(Position.fromString("E1"), Position.fromString("G1"));
+
+        assertEquals(MoveResultStatus.CASTLING_MOVE, status);
+    }
+
+    @Test
+    public void testCastlingBlack1() throws OChessBaseException {
+        Board board = new Board(true);
+
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A8"), Side.Black));
+        MoveResultStatus status = board.move(Position.fromString("E8"), Position.fromString("C8"));
+
+        assertEquals(MoveResultStatus.CASTLING_MOVE, status);
+    }
+
+    @Test
+    public void testCastlingBlack2() throws OChessBaseException {
+        Board board = new Board(true);
+
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("H8"), Side.Black));
+        MoveResultStatus status = board.move(Position.fromString("E8"), Position.fromString("G8"));
+
+        assertEquals(MoveResultStatus.CASTLING_MOVE, status);
+    }
+
+    @Test
+    public void testCheckMate1() throws OChessBaseException {
+        Board board = new Board(true);
+
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("A1"), Side.White));
+        board.addTestingPiece(Piece.createRook(board, Position.fromString("B7"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("A1"), Position.fromString("A8"));
+
+        assertEquals(MoveResultStatus.CHECKMATE, status);
     }
 }
