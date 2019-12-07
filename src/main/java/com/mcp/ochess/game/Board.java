@@ -393,6 +393,57 @@ public class Board {
         return side == Side.White ? 1 : -1;
     }
 
+    public Position queryPiece(Side side, PieceKind kind, String colHelper) throws OChessBaseException {
+        ArrayList<Piece> pieces = new ArrayList<>();
+
+        for (Piece p: layout.values()) {
+            if (p.getKind() == kind && p.getSide() == side) {
+                if (colHelper == null || (Position.fromString(colHelper + "1").getColumn() == p.getPosition().getColumn())) {
+                    pieces.add(p);
+                }
+            }
+        }
+
+        if (pieces.size() > 1) {
+            throw new OChessBaseException("Ambigious piece description");
+        }
+
+        return pieces.get(0).getPosition();
+    }
+
+    // Pawns are prioritized
+    public Position queryPiece(Side side, PieceKind kind, Position canMoveTo) throws OChessBaseException {
+        ArrayList<Piece> pieces = new ArrayList<>();
+
+        for (Piece p: layout.values()) {
+            if (p.getSide() == side) {
+                if (p.isValidMove(canMoveTo) && (kind == null || kind == p.getKind())) {
+                    pieces.add(p);
+                }
+            }
+        }
+
+        int pawnIndex = -1;
+        if (pieces.size() > 0 && kind == null) {
+            for (int i = 0; i < pieces.size(); ++i) {
+                if (pieces.get(i).kind == PieceKind.Pawn) {
+                    if (pawnIndex != -1) {
+                        throw new OChessBaseException("Ambigious piece description");
+                    }
+                    pawnIndex = i;
+                }
+            }
+
+            return pieces.get(pawnIndex).getPosition();
+        }
+
+        if (pieces.size() > 1) {
+            throw new OChessBaseException("Ambigious piece description");
+        }
+
+        return pieces.get(0).getPosition();
+    }
+
     // TESTING
     public Board(boolean testing) throws OChessBaseException {
         this.testing = testing;

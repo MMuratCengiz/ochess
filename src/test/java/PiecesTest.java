@@ -104,6 +104,17 @@ public class PiecesTest extends TestCase {
     }
 
     @Test
+    public void testKnightMoveInvalid() throws OChessBaseException {
+        Board board = new Board(true);
+        board.addTestingPiece(Piece.createKnight(board, Position.fromString("F6"), Side.White));
+
+        MoveResultStatus status = board.move(Position.fromString("F6"), Position.fromString("C6"));
+
+        assertTrue(! board.isOccupied(Position.fromString("C6")));
+        assertEquals(MoveResultStatus.INVALID_MOVE, status);
+    }
+
+    @Test
     public void testKnightCapture() throws OChessBaseException {
         Board board = new Board(true);
         board.addTestingPiece(Piece.createKnight(board, Position.fromString("C3"), Side.White));

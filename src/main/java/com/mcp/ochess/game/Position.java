@@ -16,6 +16,8 @@ public class Position {
     }
 
     public static Position fromString(String position) throws OChessBaseException {
+        position = position.toUpperCase();
+
         Position result = new Position(
                 position.charAt(0) - 64,
                 Integer.parseInt(position.charAt(1) + "")

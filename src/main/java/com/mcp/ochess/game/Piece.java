@@ -93,8 +93,9 @@ class Pawn extends Piece {
             return false;
         }
 
-        return position.getRow() + dif == to.getRow() ||
-                (position.getRow() == doubleJumpLoc && position.getRow() + dif * 2 == to.getRow());
+        return  position.getColumn() == to.getColumn() && (
+                position.getRow() + dif == to.getRow() ||
+                (position.getRow() == doubleJumpLoc && position.getRow() + dif * 2 == to.getRow()));
     }
 
     @Override
@@ -113,7 +114,8 @@ class Knight extends Piece {
     @Override
     boolean isValidMove(Position to) {
         // Simple logic here, either it should go two rows up/down and 1 left/right or vice-a-versa.
-        return (Math.abs(position.getRow() - to.getRow()) + Math.abs(position.getColumn() - to.getColumn())) == 3;
+        return (Math.abs(position.getRow() - to.getRow())  == 1 && Math.abs(position.getColumn() - to.getColumn()) == 2) ||
+                (Math.abs(position.getRow() - to.getRow())  == 2 && Math.abs(position.getColumn() - to.getColumn()) == 1);
     }
 
     @Override
@@ -187,7 +189,7 @@ class Rook extends Piece {
                 ? Math.min(position.getColumn(), to.getColumn())
                 : Math.min(position.getRow(), to.getRow());
 
-        for (int from = min + 1; from < max - 1; from++) {
+        for (int from = min + 1; from < max; from++) {
             try {
                 Position pos = rowsEqual
                         ? new Position(from, to.getRow())
