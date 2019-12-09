@@ -10,7 +10,7 @@
     <title>Playing vs TBD!</title>
     <jsp:include page="ref.jsp" />
     <script>
-        var lobbyId = "${lobbyid}";
+        let lobbyId = "${lobbyid}";
     </script>
     <script src="<spring:url value='/resources/js/game.js'/>" type="application/javascript"></script>
     <link href="<spring:url value='/resources/css/game.css'/>" rel="stylesheet" type="text/css"/>

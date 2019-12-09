@@ -3,10 +3,8 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
 
-<div id="chessboard mt-5">
-<table id="board">
-
-<%=UIBoardUtils.createBoard()%>
-
-</table>
-</div>
+<canvas id="board" width="800px" height="800px">
+    <img id="wh_pawn" src="/ochess/resources/images/wh_pawn.png" />
+    <img id="bl_pawn" src="/ochess/resources/images/bl_pawn.png" />
+    <p>plain html support coming soon</p>
+</canvas>

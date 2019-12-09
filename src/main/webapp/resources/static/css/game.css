@@ -1,11 +1,3 @@
-.white {
-    background-color: white;
-}
-
-.gray {
-    background-color: gray;
-}
-
 .player {
     font-size: 24pt;
     background-color: black;
@@ -19,42 +11,16 @@
     background-color: cadetblue;
 }
 
+#board {
+    border: 2px solid black;
+}
+
 #mainscreen {
     left: 5%;
     margin-top: 100px;
     width: 100%;
     overflow: hidden;
 }
-
-#board {
-    border: 2px solid black;
-    padding: 0;
-}
-
-#board, #chessboard {
-    top: 0;
-    margin-left: 10%;
-    width: 800px;
-    height: 800px;
-    float: left;
-}
-
-#board td {
-    width: 10%;
-    height: 10%;
-    transition: 0.25s;
-    outline-offset: -7px;
-    align-content: center;
-    vertical-align: center;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100%;
-}
-
-#board td image {
-    pointer-events: none;
-}
-
 #gameinfo {
     top: 0;
     width: 120px;
