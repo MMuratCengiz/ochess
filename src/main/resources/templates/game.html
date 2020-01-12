@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Playing vs TBD!</title>
+    <div th:replace="ref :: referrence"></div>
+    <script>
+    </script>
+    <script src="js/game.js" type="application/javascript"></script>
+    <link href="css/game.css" rel="stylesheet" type="text/css"/>
+</head>
+<body onload="onLoad()">
+<!--
+
+    Navigation bar, surrender, tutorial etc..
+ -->
+
+<div th:with="content">
+    <div class="row">
+        <div class="col-md"></div>
+        <div class="col-md"><label class="player" id="p1">Player 1</label><label class="player" id="p2">Player 2</label></div>
+        <div class="col-md"></div>
+        <div class="col-md"></div>
+    </div>
+    <div class="row">
+        <div class="col-md"></div>
+        <div class="col-md">
+            <canvas id="board" width="800px" height="800px">
+                <img id="wh_pawn" src="/ochess/resources/images/wh_pawn.png" />
+                <img id="bl_pawn" src="/ochess/resources/images/bl_pawn.png" />
+                <p>plain html support coming soon</p>
+            </canvas>
+        </div>
+        <div class="col-md"></div>
+        <div class="col-md"></div>
+    </div>
+</div>
+
+<div th:replace="nav :: navigation"></div>
+
+</body>
+</html>

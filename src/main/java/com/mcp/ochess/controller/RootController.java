@@ -1,6 +1,7 @@
 package com.mcp.ochess.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -11,12 +12,12 @@ public class RootController {
         return "forward:/lobby";
     }
 
-    @RequestMapping("/lobby")
+    @GetMapping("/game/lobby")
     public String listLobbies() {
         return "lobby";
     }
 
-    @RequestMapping("/profile")
+    @RequestMapping("/game/profile")
     public String showProfile() {
         return "lobby";
     }
@@ -26,8 +27,18 @@ public class RootController {
         return "lobby";
     }
 
-    @RequestMapping("/logout")
-    public String logout() {
-        return "lobby";
+    @RequestMapping("/accessdenied")
+    public String accessdenied() {
+        return "accessdenied";
+    }
+
+    @RequestMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @RequestMapping("/register")
+    public String register() {
+        return "register";
     }
 }

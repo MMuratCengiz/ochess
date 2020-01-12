@@ -1,20 +1,17 @@
 package com.mcp.ochess.controller;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.UTF8StreamJsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mcp.ochess.exceptions.OChessBaseException;
 import com.mcp.ochess.game.Game;
 import com.mcp.ochess.game.MoveResultStatus;
-import com.mcp.ochess.model.ActionResult;
 import com.mcp.ochess.model.MoveRequest;
 import com.mcp.ochess.model.MoveResult;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/play")
+@RequestMapping("/game/play")
 public class GameRestController {
     @PostMapping(value = "/lobby/{lobbyid}", produces = MediaType.APPLICATION_JSON_VALUE)
     public MoveResult executeMove(@PathVariable String lobbyid, @RequestBody String postData) throws JsonProcessingException, OChessBaseException {

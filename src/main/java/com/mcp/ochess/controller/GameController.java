@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/game")
+@RequestMapping("/game/ingame")
 public class GameController {
     @RequestMapping("/")
     public String home() {
