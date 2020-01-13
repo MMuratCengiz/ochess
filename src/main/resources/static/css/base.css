@@ -5,6 +5,7 @@
 
 body {
     overflow-x: hidden;
+    background-color: lightsteelblue;
 }
 
 #sidebar-wrapper {
@@ -14,6 +15,19 @@ body {
     -moz-transition: margin .25s ease-out;
     -o-transition: margin .25s ease-out;
     transition: margin .25s ease-out;
+}
+
+.authBox {
+    border: 2px solid black;
+    border-radius: 10px;
+    margin-top: 20%;
+    padding: 30px;
+    width: 100%;
+    background-color: white;
+}
+
+.authBox input {
+    width: 100%;
 }
 
 #sidebar-wrapper .sidebar-heading {

@@ -23,4 +23,8 @@ public class OChessUserDetailsService implements UserDetailsService {
                 u.getName(), u.getPassword(), l
         );
     }
+
+    public void storeUser(User user) {
+        new UserDao().saveUser(user);
+    }
 }

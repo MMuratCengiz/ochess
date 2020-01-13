@@ -31,7 +31,7 @@ public class OChessWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/register", "/static/**").permitAll()
+                .antMatchers("/", "/register", "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()

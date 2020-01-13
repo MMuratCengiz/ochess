@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
@@ -17,8 +19,17 @@ public class User {
     @GeneratedValue(strategy=SEQUENCE, generator="CUST_SEQ")
     private int id;
 
+    @NotNull
+    @NotEmpty
     private String name;
+
+    @NotNull
+    @NotEmpty
     private String password;
+
+    @NotNull
+    @NotEmpty
+    private String matchingPassword;
     @Column(name="privilege_code")
     private int privilegeCode;
 
@@ -42,7 +53,15 @@ public class User {
         return password;
     }
 
+    public String getMatchingPassword() {
+        return password;
+    }
+
     public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setMatchingPassword(String password) {
         this.password = password;
     }
 
