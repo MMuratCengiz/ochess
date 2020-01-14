@@ -4,12 +4,14 @@ import com.mcp.ochess.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class UserDao {
-//    @Autowired
-    private SessionFactory factory;
     private Session session;
+    private SessionFactory factory;
 
+    @Autowired
     public void setFactory(SessionFactory factory) {
         this.factory = factory;
     }
@@ -17,7 +19,6 @@ public class UserDao {
     public void saveUser(User user) {
         ensureSession();
         session.persist(user);
-        close();
     }
 
     public User getUser(String userName) {
@@ -39,7 +40,6 @@ public class UserDao {
     }
 
     public void close() {
-        session.close();
         session.getTransaction().commit();;
     }
 }

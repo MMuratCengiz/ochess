@@ -16,21 +16,23 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @Table(name="users")
 public class User {
     @Id
-    @GeneratedValue(strategy=SEQUENCE, generator="CUST_SEQ")
+    @GeneratedValue(strategy=SEQUENCE, generator="users_id_seq")
     private int id;
 
     @NotNull
     @NotEmpty
+    @Column(name = "name")
     private String name;
 
     @NotNull
     @NotEmpty
+    @Column(name = "password")
     private String password;
 
     @NotNull
     @NotEmpty
     private String matchingPassword;
-    @Column(name="privilege_code")
+    @Column(name = "privilege_code")
     private int privilegeCode;
 
     public int getId() {
