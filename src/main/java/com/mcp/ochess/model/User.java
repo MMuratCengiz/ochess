@@ -1,37 +1,28 @@
 package com.mcp.ochess.model;
 
-import org.springframework.context.annotation.Primary;
+import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import static javax.persistence.GenerationType.SEQUENCE;
+import javax.persistence.*;
 
 @Entity
 @Table(name="users")
 public class User {
     @Id
-    @GeneratedValue(strategy=SEQUENCE, generator="users_id_seq")
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotNull
-    @NotEmpty
+    @Length(min = 5, message = "User can not be empty or less than 5 characters.")
     @Column(name = "name")
     private String name;
 
-    @NotNull
-    @NotEmpty
+    @Length(min = 9, message = "Password must be at least 9 characters.")
     @Column(name = "password")
     private String password;
 
-    @NotNull
-    @NotEmpty
+    @Transient
     private String matchingPassword;
+
     @Column(name = "privilege_code")
     private int privilegeCode;
 
@@ -56,7 +47,7 @@ public class User {
     }
 
     public String getMatchingPassword() {
-        return password;
+        return matchingPassword;
     }
 
     public void setPassword(String password) {
@@ -64,7 +55,7 @@ public class User {
     }
 
     public void setMatchingPassword(String password) {
-        this.password = password;
+        this.matchingPassword = password;
     }
 
     public int getPrivilegeCode() {

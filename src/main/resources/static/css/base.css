@@ -5,7 +5,7 @@
 
 body {
     overflow-x: hidden;
-    background-color: lightsteelblue;
+    background-color: rgba(20, 20,  15, 0.9);
 }
 
 #sidebar-wrapper {
@@ -18,12 +18,16 @@ body {
 }
 
 .authBox {
-    border: 2px solid black;
+    border: 0px solid rgba(20, 167, 75, 0.1);
     border-radius: 10px;
     margin-top: 20%;
     padding: 30px;
     width: 100%;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.error {
+    color: darkred;
 }
 
 .authBox input {
