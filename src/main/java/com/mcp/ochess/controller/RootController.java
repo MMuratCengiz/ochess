@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -20,6 +23,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 @Controller
@@ -28,6 +32,7 @@ public class RootController {
     OChessUserDetailsService userService;
     private PasswordEncoder passwordEncoder;
     private LobbyDao lobbyDao;
+    private HttpSession session;
 
     @Autowired
     public void setLobbyDao(LobbyDao lobbyDao) {
@@ -45,7 +50,8 @@ public class RootController {
     }
 
     @GetMapping("/lobby")
-    public String listLobbies(WebRequest request, Model model) {
+    public String listLobbies(WebRequest request, Model model, HttpSession session) {
+        initModel(model, session);
         model.addAttribute("activeTab", "lobby");
         String pageStr = request.getParameter("page");
         String limitStr = request.getParameter("limit");
@@ -69,9 +75,9 @@ public class RootController {
         return "lobby";
     }
 
-
     @PostMapping("/lobby")
-    public String listLobbies(@Valid @ModelAttribute("Lobby") Lobby lobby, Model model, Errors errors) {
+    public String createLobby(@Valid @ModelAttribute("Lobby") Lobby lobby, Model model, Errors errors, HttpSession session) {
+        initModel(model, session);
         lobbyDao.saveLobby(lobby);
 
         if (errors == null) {
@@ -81,14 +87,27 @@ public class RootController {
         return "lobby";
     }
 
+    @PostMapping("/join")
+    public String joinLobby(Model model, Errors errors, HttpSession session) {
+        initModel(model, session);
+
+        if (errors != null) {
+            return "redirect:/ingame";
+        }
+
+        return "redirect:/lobby";
+    }
+
     @GetMapping(value = "/profile")
-    public String showProfile(Model model) {
+    public String showProfile(Model model, HttpSession session) {
+        initModel(model, session);
         model.addAttribute("activeTab", "profile");
         return "profile";
     }
 
     @RequestMapping("/help")
-    public String help(Model model) {
+    public String help(Model model, HttpSession session) {
+        initModel(model, session);
         model.addAttribute("activeTab", "help");
         return "help";
     }
@@ -99,7 +118,7 @@ public class RootController {
     }
 
     @GetMapping("/login")
-    public String login(Model m) {
+    public String login(Model m, HttpSession session) {
         if (isAuthenticated()) {
             return "redirect:/profile";
         }
@@ -113,7 +132,8 @@ public class RootController {
     }
 
     @PostMapping(value = "/login")
-    public String login(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Errors errors, Model model) {
+    public String login(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Errors errors,
+                        Model model, HttpSession session) {
         if (! bindingResult.hasErrors()) {
             userService.loadUserByUsername(user.getName());
         } else {
@@ -124,7 +144,7 @@ public class RootController {
     }
 
     @GetMapping(value = "/register")
-    public String register(WebRequest request, Model model) {
+    public String register(WebRequest request, Model model, HttpSession session) {
         if (isAuthenticated()) {
             return "redirect:/profile";
         }
@@ -135,7 +155,7 @@ public class RootController {
 
     @PostMapping(value = "/register")
     public String register(@Valid @ModelAttribute("user") User user, BindingResult result, WebRequest request,
-                           Errors errors) {
+                           Errors errors, HttpSession session) {
         if (! user.getMatchingPassword().equals(user.getPassword())) {
             errors.rejectValue("password", "400", "Passwords must match!");
         } else if (! errors.hasErrors()) {
@@ -154,5 +174,17 @@ public class RootController {
     private boolean isAuthenticated() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
+    }
+
+    public void initModel(Model m, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            String loggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
+            user = userService.loadUserByUsername(loggedUser);
+            session.setAttribute("user", user);
+        }
+
+        m.addAttribute("LoggedPlayer", user.getPlayer());
     }
 }

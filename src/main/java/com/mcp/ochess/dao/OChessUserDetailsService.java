@@ -21,15 +21,8 @@ public class OChessUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User u = repository.getUser(username);
-
-        ArrayList<GrantedAuthority> l = new ArrayList<>();
-        l.add(new SimpleGrantedAuthority(u.getPrivilegeCode() + ""));
-
-        return new org.springframework.security.core.userdetails.User(
-                u.getName(), u.getPassword(), l
-        );
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return repository.getUser(username);
     }
 
     public void storeUser(User user) {

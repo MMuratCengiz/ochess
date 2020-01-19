@@ -18,12 +18,12 @@ body {
 }
 
 .authBox {
-    border: 0px solid rgba(20, 167, 75, 0.1);
-    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
     margin-top: 20%;
     padding: 30px;
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(20, 30, 80, 0.15);
 }
 
 .error {

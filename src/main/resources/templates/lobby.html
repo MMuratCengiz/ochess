@@ -75,7 +75,12 @@
                     <input type="password" class="form-control" name="name" placeholder="Lobby password..."
                            th:if="${lobby.getPassword() != null}">
                     <span th:if="${lobby.getPassword() == null}">No password</span></td>
-                    <td><button class="btn btn-dark" type="submit" th:text="JOIN"></button> </td>
+                    <td>
+                        <form th:action="@{/joinLobby}" th:method="POST">
+                            <input type="hidden" name="lobbyId" th:value="${lobby.getId()}" />
+                            <button class="btn btn-dark" type="submit" th:text="JOIN"></button>
+                        </form>
+                    </td>
                 </tr>
             </th:block>
             <tr>

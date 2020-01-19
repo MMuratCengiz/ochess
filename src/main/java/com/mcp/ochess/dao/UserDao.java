@@ -1,5 +1,6 @@
 package com.mcp.ochess.dao;
 
+import com.mcp.ochess.model.Player;
 import com.mcp.ochess.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -17,9 +18,24 @@ public class UserDao {
     }
 
     public void saveUser(User user) {
-        ensureSession();
         try {
+            ensureSession();
+            Player player = new Player();
+
+            user.setPlayer(player);
+            player.setUser(user);
+
+            session.persist(player);
             session.persist(user);
+        } finally {
+            close();
+        }
+    }
+
+    public void updatePlayer(Player player) {
+        try {
+            ensureSession();
+            session.update(player);
         } finally {
             close();
         }
