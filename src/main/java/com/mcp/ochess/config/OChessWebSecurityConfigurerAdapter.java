@@ -37,7 +37,7 @@ public class OChessWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
                 .and()
                 .formLogin()
                 .loginPage("/login")
-                .successForwardUrl("/login")
+                .defaultSuccessUrl("/loginsuccess", true)
                 .failureForwardUrl("/login")
                 .permitAll()
                 .and()

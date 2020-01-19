@@ -81,7 +81,7 @@ public class RootController {
         return "lobby";
     }
 
-    @RequestMapping("/profile")
+    @GetMapping(value = "/profile")
     public String showProfile(Model model) {
         model.addAttribute("activeTab", "profile");
         return "profile";
@@ -105,6 +105,11 @@ public class RootController {
         }
         m.addAttribute("user", new User());
         return "login";
+    }
+
+    @GetMapping("/loginsuccess")
+    public String loginSuccess() {
+        return "redirect:/profile";
     }
 
     @PostMapping(value = "/login")
