@@ -11,24 +11,26 @@
         <div class="col-md">
             <form th:action="@{/register}" method="POST" class="authBox" th:object="${user}">
                 <div class="form-group">
-                    <label for="registerUser">User: </label>
+                    <label for="registerUser" style="color: black;">User: </label>
                     <input type="text" class="form-control" id="registerUser" aria-describedby="emailHelp"
                            placeholder="Enter username" th:field="*{name}">
-                    <p class="error" th:each="error: ${#fields.errors('name')}" th:text="${error}"></p>
+                    <span class="error" th:each="error: ${#fields.errors('name')}" th:text="${error}"></span>
                 </div>
                 <div class="form-group">
-                    <label for="registerPass">Password: </label>
+                    <label for="registerPass" style="color: black;">Password: </label>
                     <input type="password" class="form-control" id="registerPass" placeholder="Password"
                            th:field="*{password}">
-                    <p class="error" th:each="error: ${#fields.errors('password')}" th:text="${error}"></p>
+                    <span class="error" th:each="error: ${#fields.errors('password')}" th:text="${error}"></span>
                 </div>
                 <div class="form-group">
-                    <label for="registerPassVerification">Re-enter password: </label>
+                    <label for="registerPassVerification" style="color: black;">Re-enter password: </label>
                     <input type="password" class="form-control" id="registerPassVerification"
                            placeholder="Password again"
                            th:field="*{matchingPassword}">
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">Register</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href = '/login';">
+                    Login instead</button>
             </form>
         </div>
         <div class="col-md"></div>

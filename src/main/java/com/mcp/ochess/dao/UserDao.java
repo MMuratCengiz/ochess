@@ -4,7 +4,6 @@ import com.mcp.ochess.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,8 +18,11 @@ public class UserDao {
 
     public void saveUser(User user) {
         ensureSession();
-        session.persist(user);
-        close();
+        try {
+            session.persist(user);
+        } finally {
+            close();
+        }
     }
 
     public User getUser(String userName) {
@@ -28,8 +30,9 @@ public class UserDao {
 
         try {
             return session
-                    .createQuery("SELECT id,name,password,privilege_code FROM users WHERE name=?", User.class)
-                    .setParameter(0, userName)
+                    .createQuery("FROM User " +
+                            "WHERE name=:name", User.class)
+                    .setParameter("name", userName)
                     .getSingleResult();
         } finally {
             close();
@@ -42,6 +45,7 @@ public class UserDao {
     }
 
     public void close() {
-        session.getTransaction().commit();;
+        session.getTransaction().commit();
+        session.close();
     }
 }

@@ -3,10 +3,8 @@
 <head>
     <title>Playing vs TBD!</title>
     <div th:replace="ref :: referrence"></div>
-    <script>
-    </script>
-    <script src="js/game.js" type="application/javascript"></script>
-    <link href="css/game.css" rel="stylesheet" type="text/css"/>
+    <script th:src="@{/js/game.js}" type="application/javascript"></script>
+    <link th:href="@{/css/game.css}" rel="stylesheet" type="text/css"/>
 </head>
 <body onload="onLoad()">
 <!--
@@ -14,28 +12,33 @@
     Navigation bar, surrender, tutorial etc..
  -->
 
-<div th:with="content">
-    <div class="row">
-        <div class="col-md"></div>
-        <div class="col-md"><label class="player" id="p1">Player 1</label><label class="player" id="p2">Player 2</label></div>
-        <div class="col-md"></div>
-        <div class="col-md"></div>
-    </div>
-    <div class="row">
-        <div class="col-md"></div>
-        <div class="col-md">
-            <canvas id="board" width="800px" height="800px">
-                <img id="wh_pawn" src="/ochess/resources/images/wh_pawn.png" />
-                <img id="bl_pawn" src="/ochess/resources/images/bl_pawn.png" />
-                <p>plain html support coming soon</p>
-            </canvas>
+<th:block th:if="false">
+    <th:block th:fragment="content">
+        <div class="row">
+            <div class="col-md"></div>
+            <div class="col-md"><label class="player" id="p1">Player 1</label><label class="player" id="p2">Player 2</label></div>
+            <div class="col-md"></div>
+            <div class="col-md"></div>
         </div>
-        <div class="col-md"></div>
-        <div class="col-md"></div>
-    </div>
-</div>
+        <div class="row">
+            <div class="col-md"></div>
+            <div class="col-md">
+                <canvas id="board" width="800px" height="800px">
+                    <img id="wh_pawn" th:src="@{/images/wh_pawn.png}" />
+                    <img id="bl_pawn" th:src="@{/images/bl_pawn.png}" />
+                    <p>plain html support coming soon</p>
+                </canvas>
+            </div>
+            <div class="col-md"></div>
+            <div class="col-md"></div>
+        </div>
+    </th:block>
+</th:block>
 
-<div th:replace="nav :: navigation"></div>
+
+<th:block th:with="cls='game'">
+    <div th:replace="nav :: navigation"></div>
+</th:block>
 
 </body>
 </html>

@@ -8,9 +8,12 @@
             <!-- If in game, show surrender, help with back to game button-->
             <!-- Otherwise show profile,logout,lobby -->
 
-            <a th:href="@{/game/profile}" class="list-group-item list-group-item-action bg-dark text-light "><h2>Show Profile</h2></a>
-            <a th:href="@{/game/lobby}" class="list-group-item list-group-item-action bg-dark text-light "><h2>Lobby</h2></a>
-            <a th:href="@{/help}" class="list-group-item list-group-item-action bg-dark text-light "><h2>Help</h2></a>
+            <a th:href="@{/profile}" th:class="'list-group-item list-group-item-action ' + ${ activeTab == 'profile' ? 'bg-light text-dark' : 'bg-dark text-light' }"><h2>Show Profile</h2></a>
+            <a th:href="@{/lobby}" th:class="'list-group-item list-group-item-action ' + ${ activeTab == 'lobby' ? 'bg-light text-dark' : 'bg-dark text-light' }"><h2>Lobby</h2></a>
+            <th:block th:switch="${ingame}">
+                <a th:case="yes" th:href="@{/ingame}" th:class="'list-group-item list-group-item-action ' + ${ activeTab == 'ingame' ? 'bg-light text-dark' : 'bg-dark text-light' }"><h2>Game</h2></a>
+            </th:block>
+            <a th:href="@{/help}" th:class="'list-group-item list-group-item-action ' + ${ activeTab == 'help' ? 'bg-light text-dark' : 'bg-dark text-light' }"><h2>Help</h2></a>
             <a th:href="@{/logout}" class="list-group-item list-group-item-action bg-dark text-light "><h2>Logout</h2></a>
         </div>
     </div>
@@ -24,7 +27,7 @@
                 <div class="col-md"><label class="ochess-title">Online Chess</label></div>
             </div>
 
-            <span th:utext="${content}" escapeXml="false"/>
+            <th:block th:include="${cls} :: content"></th:block>
         </div>
     </div>
 </div>

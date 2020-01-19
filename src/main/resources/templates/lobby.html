@@ -5,6 +5,102 @@
     <th:block th:replace="ref :: referrence"></th:block>
 </head>
 <body>
+
+
+<th:block th:if="false"> <!-- Make sure the content is included only inside the navigation -->
+    <th:block th:fragment="content">
+        <br/><br/>
+        <br/><br/>
+        <div class="row">
+            <div class="col-md float-left">
+                <form th:action="@{/lobby}" method="GET">
+                    <input type="search" class="form-control" placeholder="Search for games.." name="search"/>
+                </form>
+            </div>
+            <div class="col-sm">
+                <h4 class="p-10" th:utext="'Showing results for: ' + ${search} + '.'" th:if="${search != null and #strings.length(search) > 0}"></h4>
+            </div>
+            <nav class="col-sm" aria-label="Page navigation example">
+                <ul class="pagination float-right">
+                    <li class="page-item">
+                        <a class="page-link"th:href="'?page=' + (${page} - 1) + '&limit=' + ${limit}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <th:block th:each="pg: ${#numbers.sequence(page - 1, page + 3)}">
+                        <th:block th:if="${pg} > 0">
+                            <li th:class="'page-item ' + (${pg} == ${page} ? 'active btn-dark' : '')" aria-current="page">
+                                <a th:class="'page-link'"
+                                         th:utext="${pg}"
+                                         th:href="'?page=' + ${pg} + '&limit=' + ${limit}">
+                            </a></li>
+                        </th:block>
+                    </th:block>
+                    <th:block th:if="${page} == '1'">
+                        <li class="page-item"><a class="page-link"
+                                                 th:utext="${page} + 4"
+                                                 th:href="'?page=' + (${page} + 4) + '&limit=' + ${limit}">
+                        </a></li>
+                    </th:block>
+                    <li class="page-item">
+                        <a class="page-link"th:href="'?page=' + (${page} + 1) + '&limit=' + ${limit}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Date Created</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Players</th>
+                    <th>Password</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <th:block th:each="lobby: ${lobbies}">
+                <tr>
+                    <td th:utext="${lobby.getId()}"></td>
+                    <td th:utext="${lobby.getCreatedDate().toGMTString()}"></td>
+                    <td th:utext="${lobby.getName()}"></td>
+                    <td th:utext="${lobby.getType() == 1 ? 'Normal' : 'Ranked'}"></td>
+
+                    <td th:utext="${lobby.getBlackUser() == null && lobby.getWhiteUser() == null ? '0/2'
+                        : (lobby.getWhiteUser() != null && lobby.getBlackUser() != null ? '2/2' : '1/2') }"></td>
+                    <td>
+                    <input type="password" class="form-control" name="name" placeholder="Lobby password..."
+                           th:if="${lobby.getPassword() != null}">
+                    <span th:if="${lobby.getPassword() == null}">No password</span></td>
+                    <td><button class="btn btn-dark" type="submit" th:text="JOIN"></button> </td>
+                </tr>
+            </th:block>
+            <tr>
+                <form th:action="@{/lobby}" method="POST">
+                    <td></td>
+                    <td></td>
+                    <td><input type="text" class="form-control" name="name" placeholder="Lobby name..."></td>
+                    <td>
+                        <select class="custom-select" name="type">
+                            <option selected value="1">Normal</option>
+                            <option value="2">Ranked</option>
+                        </select>
+                    </td>
+                    <td></td>
+                    <td><input type="password" class="form-control" name="password" placeholder="Lobby password..."></td>
+                    <td><button class="btn btn-dark" type="submit" th:text="CREATE"></button> </td>
+                </form>
+            </tr>
+        </table>
+    </th:block>
+</th:block>
+
+<th:block th:with="cls='lobby'">
     <div th:replace="nav :: navigation"></div>
+</th:block>
+
 </body>
 </html>
