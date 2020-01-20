@@ -32,7 +32,6 @@ public class RootController {
     OChessUserDetailsService userService;
     private PasswordEncoder passwordEncoder;
     private LobbyDao lobbyDao;
-    private HttpSession session;
 
     @Autowired
     public void setLobbyDao(LobbyDao lobbyDao) {
@@ -72,6 +71,7 @@ public class RootController {
         model.addAttribute("page", page);
         model.addAttribute("limit", limit);
         model.addAttribute("lobbies", lobbyDao.listLobbies(limit, page, search));
+        model.addAttribute("lobby", new Lobby());
         return "lobby";
     }
 
@@ -84,15 +84,20 @@ public class RootController {
             return "redirect:/ingame";
         }
 
-        return "lobby";
+        return "redirect:/lobby";
     }
 
     @PostMapping("/join")
-    public String joinLobby(Model model, Errors errors, HttpSession session) {
+    public String joinLobby(@ModelAttribute("Lobby") Lobby lobby, BindingResult result, Model model, Errors errors, HttpSession session) {
         initModel(model, session);
 
+        User user = (User) session.getAttribute("User");
+        user.getPlayer().setInGameLobbyId(lobby.getId());
+
+        userService.getDao().updatePlayer(user.getPlayer());
+
         if (errors != null) {
-            return "redirect:/ingame";
+            return "redirect:/ingame/";
         }
 
         return "redirect:/lobby";
@@ -122,7 +127,7 @@ public class RootController {
         if (isAuthenticated()) {
             return "redirect:/profile";
         }
-        m.addAttribute("user", new User());
+
         return "login";
     }
 
@@ -153,6 +158,14 @@ public class RootController {
         return "register";
     }
 
+
+    @RequestMapping("/ingame")
+    public String home(Model model, HttpSession session) {
+        initModel(model, session);
+        SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        return "game";
+    }
+
     @PostMapping(value = "/register")
     public String register(@Valid @ModelAttribute("user") User user, BindingResult result, WebRequest request,
                            Errors errors, HttpSession session) {
@@ -177,14 +190,24 @@ public class RootController {
     }
 
     public void initModel(Model m, HttpSession session) {
-        User user = (User) session.getAttribute("user");
+        Object userObject = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = null;
 
-        if (user == null) {
+        if (userObject != null && userObject instanceof User) {
+            user = (User) userObject;
+        } else if (session.getAttribute("User") != null) {
+            user = (User) session.getAttribute("user");
+        } else {
             String loggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
             user = userService.loadUserByUsername(loggedUser);
-            session.setAttribute("user", user);
         }
 
+        session.setAttribute("User", user);
+        m.addAttribute("User", user);
         m.addAttribute("LoggedPlayer", user.getPlayer());
+
+        if (user.getPlayer().getInGameLobbyId() != null) {
+            m.addAttribute("ingame", true);
+        }
     }
 }

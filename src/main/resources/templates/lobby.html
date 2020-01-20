@@ -76,26 +76,26 @@
                            th:if="${lobby.getPassword() != null}">
                     <span th:if="${lobby.getPassword() == null}">No password</span></td>
                     <td>
-                        <form th:action="@{/joinLobby}" th:method="POST">
-                            <input type="hidden" name="lobbyId" th:value="${lobby.getId()}" />
-                            <button class="btn btn-dark" type="submit" th:text="JOIN"></button>
+                        <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
+                            <input type="hidden" name="id" th:value="${lobby.getId()}" />
+                            <button class="btn btn-dark" type="submit" th:field="*{id}" th:text="JOIN"></button>
                         </form>
                     </td>
                 </tr>
             </th:block>
             <tr>
-                <form th:action="@{/lobby}" method="POST">
+                <form th:action="@{/lobby}" method="POST" th:object="${lobby}">
                     <td></td>
                     <td></td>
-                    <td><input type="text" class="form-control" name="name" placeholder="Lobby name..."></td>
+                    <td><input type="text" class="form-control" name="name" placeholder="Lobby name..." th:field="*{name}"></td>
                     <td>
-                        <select class="custom-select" name="type">
+                        <select class="custom-select" name="type" th:field="*{type}">
                             <option selected value="1">Normal</option>
                             <option value="2">Ranked</option>
                         </select>
                     </td>
                     <td></td>
-                    <td><input type="password" class="form-control" name="password" placeholder="Lobby password..."></td>
+                    <td><input type="password" class="form-control" name="password" placeholder="Lobby password..." th:field="*{password}"></td>
                     <td><button class="btn btn-dark" type="submit" th:text="CREATE"></button> </td>
                 </form>
             </tr>

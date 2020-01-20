@@ -45,11 +45,11 @@ public class Player {
         this.user = user;
     }
 
-    public int getInGameLobbyId() {
+    public Integer getInGameLobbyId() {
         return inGameLobbyId;
     }
 
-    public void setInGameLobbyId(int inGameLobbyId) {
+    public void setInGameLobbyId(Integer inGameLobbyId) {
         this.inGameLobbyId = inGameLobbyId;
     }
 

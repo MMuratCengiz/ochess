@@ -28,4 +28,8 @@ public class OChessUserDetailsService implements UserDetailsService {
     public void storeUser(User user) {
         repository.saveUser(user);
     }
+
+    public UserDao getDao() {
+        return repository;
+    }
 }
