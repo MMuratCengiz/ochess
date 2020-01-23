@@ -1,9 +1,28 @@
+.playing {
+    font-size: 24pt;
+    margin-right: 30px;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
 .player {
     font-size: 24pt;
-    background-color: black;
-    color: ghostwhite;
     margin-right: 30px;
     padding: 20px;
+}
+
+.white {
+    background-color: white;
+    color: black;
+    border: 2px solid midnightblue;
+}
+
+.black {
+    background-color: black;
+    color: white;
+    border: 2px solid midnightblue;
 }
 
 .nav {

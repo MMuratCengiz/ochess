@@ -126,7 +126,8 @@ public class Board {
         layout.remove(from);
         layout.put(to, piece);
 
-        if (tryCheckMate(piece.getSide())) {
+        if ((piece.getSide() == Side.White && isCellThreatened(whiteKing.getPosition(), opposite(piece.getSide()))) ||
+                (piece.getSide() == Side.Black && isCellThreatened(blackKing.getPosition(), opposite(piece.getSide())))) {
             // Revert to last state
             layout.put(to, tempToPiece);
             piece.moveToNoCheck(from);
@@ -144,13 +145,13 @@ public class Board {
             return MoveResultStatus.PAWN_TRANSFORM;
         }
 
-        if (occupied != null) {
-            return MoveResultStatus.KILL;
-        }
-
         if ((piece.getSide() == Side.White && isCellThreatened(blackKing.getPosition(), piece.getSide())) ||
                 (piece.getSide() == Side.Black && isCellThreatened(whiteKing.getPosition(), piece.getSide()))) {
             return tryCheckMate(opposite(piece.side)) ? MoveResultStatus.CHECKMATE : MoveResultStatus.CHECK;
+        }
+
+        if (occupied != null) {
+            return MoveResultStatus.KILL;
         }
 
         if (enPassantMove != null) {
@@ -181,7 +182,7 @@ public class Board {
 
         for (int[] move: moveTries) {
             try {
-                anyMoveIsValid = king.isValidMove(new Position(king.position.getColumn() + move[0], king.position.getRow() + move[1]));
+                anyMoveIsValid = anyMoveIsValid || king.isValidMove(new Position(king.position.getColumn() + move[0], king.position.getRow() + move[1]));
             } catch (OChessBaseException ignored) {
                 // Position is out of bounds
             }
@@ -377,7 +378,7 @@ public class Board {
         ArrayList<Piece> pieces = new ArrayList<>();
 
         for (Piece p: layout.values()) {
-            if (p.getKind() != PieceKind.King && p.getSide() == threatenedBy && p.threatens(position)) {
+             if (p != null && p.getKind() != PieceKind.King && p.getSide() == threatenedBy && p.threatens(position)) {
                 pieces.add(p);
             }
         }

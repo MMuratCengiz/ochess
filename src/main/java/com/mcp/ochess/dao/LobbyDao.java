@@ -91,4 +91,13 @@ public class LobbyDao {
         session.getTransaction().commit();
         session.close();
     }
+
+    public void updateLobby(Lobby lobby) {
+        try {
+            ensureSession();
+            session.update(lobby);
+        } finally {
+            close();
+        }
+    }
 }

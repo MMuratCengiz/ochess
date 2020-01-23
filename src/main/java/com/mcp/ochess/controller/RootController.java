@@ -2,24 +2,20 @@ package com.mcp.ochess.controller;
 
 import com.mcp.ochess.dao.LobbyDao;
 import com.mcp.ochess.dao.OChessUserDetailsService;
+import com.mcp.ochess.exceptions.OChessBaseException;
+import com.mcp.ochess.game.Game;
 import com.mcp.ochess.model.Lobby;
 import com.mcp.ochess.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
@@ -76,11 +72,12 @@ public class RootController {
     }
 
     @PostMapping("/lobby")
-    public String createLobby(@Valid @ModelAttribute("Lobby") Lobby lobby, Model model, Errors errors, HttpSession session) {
+    public String createLobby(@Valid @ModelAttribute("Lobby") Lobby lobby, Model model, Errors errors, HttpSession session) throws OChessBaseException {
         initModel(model, session);
         lobbyDao.saveLobby(lobby);
 
         if (errors == null) {
+            Game.createNewGame(lobby.getId());
             return "redirect:/ingame";
         }
 
@@ -91,13 +88,24 @@ public class RootController {
     public String joinLobby(@ModelAttribute("Lobby") Lobby lobby, BindingResult result, Model model, Errors errors, HttpSession session) {
         initModel(model, session);
 
-        User user = (User) session.getAttribute("User");
-        user.getPlayer().setInGameLobbyId(lobby.getId());
+        lobby = lobbyDao.getLobby(lobby.getId());
 
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (lobby.getWhiteUser() == null) {
+            lobby.setWhiteUser(user);
+        } else if (lobby.getBlackUser() == null) {
+            lobby.setBlackUser(user);
+        } else {
+            // Todo lobby full
+        }
+
+        lobbyDao.updateLobby(lobby);
         userService.getDao().updatePlayer(user.getPlayer());
+        user.getPlayer().setInGameLobby(lobby);
 
         if (errors != null) {
-            return "redirect:/ingame/";
+            return "redirect:/ingame";
         }
 
         return "redirect:/lobby";
@@ -163,6 +171,7 @@ public class RootController {
     public String home(Model model, HttpSession session) {
         initModel(model, session);
         SecurityContextHolder.getContext().getAuthentication().getCredentials();
+        model.addAttribute("activeTab", "ingame");
         return "game";
     }
 
@@ -190,24 +199,14 @@ public class RootController {
     }
 
     public void initModel(Model m, HttpSession session) {
-        Object userObject = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = null;
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (userObject != null && userObject instanceof User) {
-            user = (User) userObject;
-        } else if (session.getAttribute("User") != null) {
-            user = (User) session.getAttribute("user");
-        } else {
-            String loggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
-            user = userService.loadUserByUsername(loggedUser);
-        }
-
-        session.setAttribute("User", user);
         m.addAttribute("User", user);
         m.addAttribute("LoggedPlayer", user.getPlayer());
 
-        if (user.getPlayer().getInGameLobbyId() != null) {
+        if (user.getPlayer().getInGameLobby() != null) {
             m.addAttribute("ingame", true);
+            m.addAttribute("lobbyId", user.getPlayer().getInGameLobby().getId());
         }
     }
 }

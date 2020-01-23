@@ -6,17 +6,17 @@ import java.util.HashMap;
 
 public class Game {
     private static final Object SYNC = new Object();
-    private static final HashMap<String, Game> games = new HashMap<>();
+    private static final HashMap<Integer, Game> games = new HashMap<>();
 
     private Side turn;
     private Board board;
 
-    private Game() {
-        // black since we flip the turn in the beginning of the move for code simplicity
-        turn = Side.Black;
+    private Game() throws OChessBaseException {
+        turn = Side.White;
+        board = new Board();
     }
 
-    public static void createNewGame(String lobbyId) throws OChessBaseException {
+    public static void createNewGame(Integer lobbyId) throws OChessBaseException {
         synchronized (SYNC) {
             if (games.containsKey(lobbyId)) {
                 throw new OChessBaseException(String.format("A game for this lobby(%s) already exists", lobbyId));
@@ -26,7 +26,7 @@ public class Game {
         }
     }
 
-    public static Game getGame(String lobbyId) throws OChessBaseException {
+    public static Game getGame(Integer lobbyId) throws OChessBaseException {
         synchronized (SYNC) {
             Game game = games.get(lobbyId);
             if (game == null) {
@@ -36,17 +36,28 @@ public class Game {
         }
     }
 
+    public static void ensureNewGame(Integer lobbyId) throws OChessBaseException {
+        synchronized (SYNC) {
+            if (! games.containsKey(lobbyId)) {
+                games.put(lobbyId, new Game());
+            }
+        }
+    }
+
     // True means checkMate
     public MoveResultStatus move(String from, String to) throws OChessBaseException {
-        turn = turn == Side.White ? Side.Black : Side.White;
-
         Piece piece = board.getPiece(Position.fromString(from));
 
         if (piece != null && piece.getSide() != turn) {
-            throw new OChessBaseException("Moving out of turn.");
+            return MoveResultStatus.OUT_OF_TURN;
         }
 
         MoveResultStatus status = board.move(Position.fromString(from), Position.fromString(to));
+
+        if (status != MoveResultStatus.INVALID_MOVE
+                && status != MoveResultStatus.INVALID_MOVE_KING_THREATENED) {
+            turn = turn == Side.White ? Side.Black : Side.White;
+        }
 
         if (status == MoveResultStatus.PAWN_TRANSFORM) {
             // wait for transform
@@ -62,5 +73,9 @@ public class Game {
 
     public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
         board.transformPawn(pawnPos, transformTo);
+    }
+
+    public boolean validateTurn(Side userSide) {
+        return turn == userSide;
     }
 }

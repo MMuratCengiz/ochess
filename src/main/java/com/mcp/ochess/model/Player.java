@@ -14,8 +14,9 @@ public class Player {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @Column(name = "in_game")
-    private Integer inGameLobbyId;
+    @OneToOne(targetEntity = Lobby.class)
+    @JoinColumn(name = "in_game", referencedColumnName = "id")
+    private Lobby inGameLobby;
 
     @Column(name = "wins")
     private int wins;
@@ -45,12 +46,12 @@ public class Player {
         this.user = user;
     }
 
-    public Integer getInGameLobbyId() {
-        return inGameLobbyId;
+    public Lobby getInGameLobby() {
+        return inGameLobby;
     }
 
-    public void setInGameLobbyId(Integer inGameLobbyId) {
-        this.inGameLobbyId = inGameLobbyId;
+    public void setInGameLobby(Lobby inGameLobbyId) {
+        this.inGameLobby = inGameLobbyId;
     }
 
     public int getWins() {

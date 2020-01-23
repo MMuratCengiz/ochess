@@ -3,6 +3,12 @@
 <head>
     <title>Playing vs TBD!</title>
     <div th:replace="ref :: referrence"></div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let lobbyId = /*[[${lobbyId}]]*/ 0;
+        let user = /*[[${User.getName()}]]*/ 0;
+        /*]]>*/
+    </script>
     <script th:src="@{/js/game.js}" type="application/javascript"></script>
     <link th:href="@{/css/game.css}" rel="stylesheet" type="text/css"/>
 </head>
@@ -16,16 +22,29 @@
     <th:block th:fragment="content">
         <div class="row">
             <div class="col-md"></div>
-            <div class="col-md"><label class="player" id="p1">Player 1</label><label class="player" id="p2">Player 2</label></div>
+            <div class="col-md"></div>
             <div class="col-md"></div>
             <div class="col-md"></div>
         </div>
-        <div class="row">
-            <div class="col-md"></div>
-            <div class="col-md">
-                <canvas id="board" width="800px" height="800px">
+        <div class="row mt-10">
+            <div class="col-md float-right">
+                <label class="player white float-right" id="p1">Player 1</label><span id="playingWhite" class="playing float-right">Playing: </span><br/><br/><br/><br/><br/><br/>
+                <label class="player black float-right" id="p2">Player 2</label><span id="playingBlack" class="playing float-right">Playing: </span>
+            </div>
+            <div class="col-md float-left">
+                <canvas id="board" width="480px" height="480px">
                     <img id="wh_pawn" th:src="@{/images/wh_pawn.png}" />
                     <img id="bl_pawn" th:src="@{/images/bl_pawn.png}" />
+                    <img id="wh_rook" th:src="@{/images/wh_rook.png}" />
+                    <img id="bl_rook" th:src="@{/images/bl_rook.png}" />
+                    <img id="wh_king" th:src="@{/images/wh_king.png}" />
+                    <img id="bl_king" th:src="@{/images/bl_king.png}" />
+                    <img id="wh_knight" th:src="@{/images/wh_knight.png}" />
+                    <img id="bl_knight" th:src="@{/images/bl_knight.png}" />
+                    <img id="wh_bishop" th:src="@{/images/wh_bishop.png}" />
+                    <img id="bl_bishop" th:src="@{/images/bl_bishop.png}" />
+                    <img id="wh_queen" th:src="@{/images/wh_queen.png}" />
+                    <img id="bl_queen" th:src="@{/images/bl_queen.png}" />
                     <p>plain html support coming soon</p>
                 </canvas>
             </div>

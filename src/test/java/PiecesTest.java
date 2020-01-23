@@ -235,7 +235,7 @@ public class PiecesTest extends TestCase {
         status = board.move(Position.fromString("C3"), Position.fromString("C8"));
 
         assertTrue(board.isOccupied(Position.fromString("C8")));
-        assertEquals(MoveResultStatus.KILL, status);
+        assertEquals(MoveResultStatus.CHECK, status);
     }
 
     @Test

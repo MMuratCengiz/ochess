@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/game/play")
 public class GameRestController {
     @PostMapping(value = "/lobby/{lobbyid}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public MoveResult executeMove(@PathVariable String lobbyid, @RequestBody String postData) throws JsonProcessingException, OChessBaseException {
+    public MoveResult executeMove(@PathVariable Integer lobbyId, @RequestBody String postData) throws JsonProcessingException, OChessBaseException {
         ObjectMapper mapper = new ObjectMapper();
         MoveRequest request = mapper.readValue(postData, MoveRequest.class);
 
-        Game game = Game.getGame(lobbyid);
+        Game game = Game.getGame(lobbyId);
         MoveResultStatus status = game.move(request.getFrom(), request.getTo());
 
         if (status == MoveResultStatus.INVALID_MOVE) {
@@ -29,13 +29,29 @@ public class GameRestController {
             throw new OChessBaseException("No piece exists in the selected cell.");
         }
 
+        MoveResult result = createMoveResult(status);
+
+        return result;
+    }
+
+    public static MoveResult createMoveResult(MoveResultStatus status) {
         MoveResult result = new MoveResult();
 
-        result.setValidMove(status != MoveResultStatus.PIECE_DOES_NOT_EXIST || status != MoveResultStatus.INVALID_MOVE);
+        result.setValidMove(
+                status != MoveResultStatus.PIECE_DOES_NOT_EXIST &&
+                status != MoveResultStatus.INVALID_MOVE_KING_THREATENED &&
+                status != MoveResultStatus.OUT_OF_TURN &&
+                status != MoveResultStatus.INVALID_MOVE);
 
         switch (status) {
+            case OUT_OF_TURN:
+                result.setActionResult("OutOfTurn");
+                break;
             case INVALID_MOVE:
                 result.setActionResult("InvalidMove");
+                break;
+            case INVALID_MOVE_KING_THREATENED:
+                result.setActionResult("InvalidMoveKingThreatened");
                 break;
             case PIECE_DOES_NOT_EXIST:
                 result.setActionResult("PieceDoesNotExist");
@@ -56,6 +72,4 @@ public class GameRestController {
 
         return result;
     }
-
-
 }
