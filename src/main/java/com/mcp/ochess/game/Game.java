@@ -1,6 +1,7 @@
 package com.mcp.ochess.game;
 
 import com.mcp.ochess.exceptions.OChessBaseException;
+import com.mcp.ochess.model.MoveResult;
 
 import java.util.HashMap;
 
@@ -45,17 +46,23 @@ public class Game {
     }
 
     // True means checkMate
-    public MoveResultStatus move(String from, String to) throws OChessBaseException {
+    public MoveResultStatus move(String from, String to, Side side) throws OChessBaseException {
         Piece piece = board.getPiece(Position.fromString(from));
 
         if (piece != null && piece.getSide() != turn) {
             return MoveResultStatus.OUT_OF_TURN;
         }
 
+        if (piece != null && side != null && piece.getSide() != side) {
+            return MoveResultStatus.MOVING_OPPONENT_PIECE;
+        }
+
         MoveResultStatus status = board.move(Position.fromString(from), Position.fromString(to));
 
         if (status != MoveResultStatus.INVALID_MOVE
-                && status != MoveResultStatus.INVALID_MOVE_KING_THREATENED) {
+                && status != MoveResultStatus.INVALID_MOVE_KING_THREATENED
+                && status != MoveResultStatus.PIECE_DOES_NOT_EXIST
+                && status != MoveResultStatus.MOVING_OPPONENT_PIECE) {
             turn = turn == Side.White ? Side.Black : Side.White;
         }
 

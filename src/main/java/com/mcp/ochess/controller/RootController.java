@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpSession;
+import javax.swing.text.Utilities;
 import javax.validation.Valid;
 
 @Controller
@@ -68,6 +69,12 @@ public class RootController {
         model.addAttribute("limit", limit);
         model.addAttribute("lobbies", lobbyDao.listLobbies(limit, page, search));
         model.addAttribute("lobby", new Lobby());
+        model.addAttribute("error", "");
+        if (request.getParameter("error") != null) {
+            int errorLobbyId = Integer.parseInt(request.getParameter("errorLobbyId"));
+            model.addAttribute("errorLobbyId", errorLobbyId);
+            model.addAttribute("error", request.getParameter("error"));
+        }
         return "lobby";
     }
 
@@ -88,7 +95,14 @@ public class RootController {
     public String joinLobby(@ModelAttribute("Lobby") Lobby lobby, BindingResult result, Model model, Errors errors, HttpSession session) {
         initModel(model, session);
 
-        lobby = lobbyDao.getLobby(lobby.getId());
+        int joinId = lobby.getId();
+        lobby = lobbyDao.getLobby(joinId, lobby.getPassword());
+
+        if (lobby == null) {
+            model.addAttribute("error", "Invalid password!");
+            model.addAttribute("errorLobbyId", joinId);
+            return "redirect:/lobby";
+        }
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -97,7 +111,8 @@ public class RootController {
         } else if (lobby.getBlackUser() == null) {
             lobby.setBlackUser(user);
         } else {
-            // Todo lobby full
+            model.addAttribute("error", "Lobby full!");
+            model.addAttribute("errorLobbyId", lobby.getId());
         }
 
         lobbyDao.updateLobby(lobby);
@@ -108,6 +123,7 @@ public class RootController {
             return "redirect:/ingame";
         }
 
+        model.addAttribute("error", "");
         return "redirect:/lobby";
     }
 

@@ -19,7 +19,7 @@ public class GameRestController {
         MoveRequest request = mapper.readValue(postData, MoveRequest.class);
 
         Game game = Game.getGame(lobbyId);
-        MoveResultStatus status = game.move(request.getFrom(), request.getTo());
+        MoveResultStatus status = game.move(request.getFrom(), request.getTo(), null); // todo
 
         if (status == MoveResultStatus.INVALID_MOVE) {
             throw new OChessBaseException("Invalid move.");

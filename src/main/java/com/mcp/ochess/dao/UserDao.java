@@ -25,8 +25,8 @@ public class UserDao {
             user.setPlayer(player);
             player.setUser(user);
 
-            session.persist(player);
             session.persist(user);
+            session.persist(player);
         } finally {
             close();
         }

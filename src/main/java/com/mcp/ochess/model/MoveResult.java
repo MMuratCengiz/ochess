@@ -1,11 +1,14 @@
 package com.mcp.ochess.model;
 
 public class MoveResult {
-    private String type = "MoveResult";
+    private final String type = "MoveResult";
 
     private boolean isValidMove;
     private String actionResult;
     private String moveId;
+    private String from;
+    private String to;
+
 
     public String getMoveId() {
         return moveId;
@@ -33,5 +36,21 @@ public class MoveResult {
 
     public String getType() {
         return type;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
     }
 }

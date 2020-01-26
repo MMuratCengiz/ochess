@@ -72,7 +72,7 @@ public class Board {
     }
 
     public boolean isOccupied(Position position) {
-        return layout.containsKey(position);
+        return layout.get(position) != null;
     }
 
     public Piece getPiece(Position pos) {
@@ -182,7 +182,8 @@ public class Board {
 
         for (int[] move: moveTries) {
             try {
-                anyMoveIsValid = anyMoveIsValid || king.isValidMove(new Position(king.position.getColumn() + move[0], king.position.getRow() + move[1]));
+                anyMoveIsValid = anyMoveIsValid || king.isValidMove(
+                        new Position(king.position.getColumn() + move[0], king.position.getRow() + move[1]));
             } catch (OChessBaseException ignored) {
                 // Position is out of bounds
             }
@@ -194,7 +195,8 @@ public class Board {
 
         // check if the threatening piece can be captured
         Piece piece = threateningPieces.get(0); // there should only be one
-        if (isCellThreatened(piece.getPosition(), opposite(side))) {
+
+        if (isCellThreatened(piece.getPosition(), opposite(side)) || king.threatens(piece.getPosition())) {
             return false;
         }
 
@@ -334,8 +336,8 @@ public class Board {
     }
 
     private boolean tryBishopCheckMate(Position threatPos, Piece king) throws OChessBaseException {
-        int colDif = threatPos.getColumn() > king.getPosition().getColumn() ? 1 : -1;
-        int rowDif = threatPos.getRow() > king.getPosition().getRow() ? 1 : -1;
+        int colDif = threatPos.getColumn() > king.getPosition().getColumn() ? -1 : 1;
+        int rowDif = threatPos.getRow() > king.getPosition().getRow() ? -1 : 1;
 
         int colPos = threatPos.getColumn();
         int rowPos = threatPos.getRow();

@@ -10,6 +10,7 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -41,15 +42,38 @@ public class LobbyDao {
         }
     }
 
-    public Lobby getLobby(int lobbyId) {
+    public Lobby getLobby(int lobbyId, String password) {
         ensureSession();
 
+        if (password != null && password.length() == 0) {
+            password = null;
+        }
+
         try {
-            return session
-                    .createQuery("FROM Lobby " +
-                            "WHERE id=:id", Lobby.class)
-                    .setParameter("id", lobbyId)
-                    .getSingleResult();
+            String queryString = "FROM Lobby WHERE id=:id";
+
+            Query<Lobby> query = session
+                    .createQuery(queryString, Lobby.class)
+                    .setParameter("id", lobbyId);
+
+            List<Lobby> lobby = query.getResultList();
+            Lobby result = lobby.size() > 0 ? lobby.get(0) : null;
+
+            if (result == null ||
+                    password != null && result.getPassword() == null ||
+                    password == null && result.getPassword() != null) {
+                return null;
+            }
+
+            if (password == null && result.getPassword() == null) {
+                return result;
+            }
+
+            if (! new BCryptPasswordEncoder().matches(password, result.getPassword())) {
+                return null;
+            }
+
+            return result;
         } finally {
             close();
         }

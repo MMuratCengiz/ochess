@@ -71,16 +71,19 @@
 
                     <td th:utext="${lobby.getBlackUser() == null && lobby.getWhiteUser() == null ? '0/2'
                         : (lobby.getWhiteUser() != null && lobby.getBlackUser() != null ? '2/2' : '1/2') }"></td>
-                    <td>
-                    <input type="password" class="form-control" name="name" placeholder="Lobby password..."
-                           th:if="${lobby.getPassword() != null}">
-                    <span th:if="${lobby.getPassword() == null}">No password</span></td>
-                    <td>
-                        <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
+                    <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
+                        <td>
+                        <input type="password" class="form-control" name="password" placeholder="Lobby password..."
+                               th:if="${lobby.getPassword() != null}">
+                        <span th:if="${lobby.getPassword() == null}">No password</span>
+                        <span class="error" th:if="${error.length() > 0 && lobby.getId() == errorLobbyId}" th:utext="${error}"></span>
+                        </td>
+                        <td>
                             <input type="hidden" name="id" th:value="${lobby.getId()}" />
                             <button class="btn btn-dark" type="submit" th:field="*{id}" th:text="JOIN"></button>
-                        </form>
-                    </td>
+                        </td>
+                    </form>
+
                 </tr>
             </th:block>
             <tr>

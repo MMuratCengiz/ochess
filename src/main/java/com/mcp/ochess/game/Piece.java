@@ -101,7 +101,26 @@ class Pawn extends Piece {
     @Override
     boolean threatens(Position target) {
         int dif = side == Side.White ? 1 : -1;
-        return position.getRow() + dif == target.getRow() && Math.abs(position.getColumn() - target.getColumn()) == 1;
+
+        Position pos = this.getPosition();
+        try {
+            Piece threatenLeft  = board.getPiece(new Position(pos.getColumn() - 1, pos.getRow() + dif));
+            Piece threatenRight = board.getPiece(new Position(pos.getColumn() + 1, pos.getRow() + dif));
+
+
+            boolean isLeftThreatened  = threatenLeft != null &&
+                    threatenLeft.getSide() == oppositeSide() &&
+                    threatenLeft.getPosition().equals(target);
+
+            boolean isRightThreatened = threatenRight != null &&
+                    threatenRight.getSide() == oppositeSide() &&
+                    threatenRight.getPosition().equals(target);
+
+            return isLeftThreatened || isRightThreatened;
+        } catch (Exception outOfBounds) {
+            return false;
+        }
+
     }
 }
 
@@ -242,11 +261,17 @@ class King extends Piece {
 
     @Override
     boolean isValidMove(Position to) {
-        if (board.isCellThreatened(to, oppositeSide())) {
+        Piece pieceAtLoc = board.getPiece(to);
+
+        if (board.isCellThreatened(to, oppositeSide()) || (pieceAtLoc != null
+                && pieceAtLoc.getSide() != oppositeSide())) {
             return false;
         }
 
-        return Math.abs(to.getRow() - position.getRow()) == 1 && Math.abs(to.getColumn() - position.getColumn()) == 1;
+        int rowDif = Math.abs(to.getRow() - position.getRow());
+        int colDif = Math.abs(to.getColumn() - position.getColumn());
+
+        return rowDif == 1 && colDif == 1 || rowDif == 0 && colDif == 1 || rowDif == 1 && colDif == 0;
     }
 
     @Override

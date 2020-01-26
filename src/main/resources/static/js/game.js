@@ -41,26 +41,27 @@ let alivePieces = [
     {side: "bl", kind: "pawn", posCol: 8, posRow: 7},
 ];
 
+const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
 let mouseX;
 let mouseY;
-let letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
 let gameSocket;
 let whitePlaying = false;
-let currentMove = {};
+let textCountDownSecs = 0.0;
+let textToShow = "";
+let imageHeight = 110;
+let squareSize = 130;
+let imageWidth = 63;
 
-const imageSize = 60;
-
-function update(ctx) {
+function update(ctx, deltaTime) {
     for (let row = 0; row < 8; ++row) {
         for (let cell = 0; cell < 8; ++cell) {
-            /*if (Math.floor(mouseX / imageSize) === cell && Math.floor(mouseY / imageSize) === row) {
-                ctx.fillStyle = "rgba(20,20,20,0.5)";
-            } else {
-            }*/
+            if (Math.floor(mouseX / squareSize) === cell && Math.floor(mouseY / squareSize) === row) {
+                ctx.fillStyle = "rgba(20,20,20,0.6)";
+            }
 
             ctx.fillStyle = getBackgroundColor(row, cell);
-
-            ctx.fillRect(imageSize * cell, imageSize * row, imageSize, imageSize);
+            ctx.fillRect(squareSize * cell, squareSize * row, squareSize, squareSize);
         }
     }
 
@@ -69,11 +70,26 @@ function update(ctx) {
         let pieceImg = document.getElementById(piece.side + "_" + piece.kind);
 
         if (holdingPiece && holdingPieceCoor.x + 1 === piece.posCol && holdingPieceCoor.y === piece.posRow) {
-            ctx.drawImage(pieceImg, mouseX - (imageSize / 2), mouseY - (imageSize / 2), imageSize, imageSize);
+            ctx.drawImage(pieceImg, mouseX - (squareSize / 2) + 30, mouseY - (squareSize / 2) + 5, imageWidth, imageHeight);
         } else {
-            ctx.drawImage(pieceImg, (piece.posCol - 1) * imageSize - 2, (Math.abs(8 - piece.posRow)) * imageSize,
-                imageSize, imageSize);
+            ctx.drawImage(pieceImg,
+                (piece.posCol - 1) * squareSize + 30,
+                (Math.abs(8 - piece.posRow)) * squareSize + 10,
+                imageWidth, imageHeight);
         }
+    }
+
+
+    textCountDownSecs -= deltaTime;
+
+    if (textCountDownSecs <= 0) {
+        textToShow = "";
+    }
+
+    if (textToShow.length !== 0) {
+        ctx.font = "bold 48pt Tahoma, Geneva, sans-serif";
+        ctx.fillStyle = "darkred";
+        ctx.fillText(textToShow, 0, squareSize * 3.95);
     }
 }
 
@@ -92,14 +108,20 @@ function onLoad() {
 
     canvas.onmousedown = function (e) {
         holdingPiece = true;
-        holdingPieceCoor.x = Math.floor(e.offsetX / imageSize);
-        holdingPieceCoor.y = Math.abs(8 - Math.floor(e.offsetY / imageSize));
+        holdingPieceCoor.x = Math.floor(e.offsetX / squareSize);
+        holdingPieceCoor.y = Math.abs(8 - Math.floor(e.offsetY / squareSize));
     };
 
     canvas.onmouseup = onMouseUp;
 
+    let delta;
+    let deltaBefore;
+
     setInterval(function () {
-        update(ctx);
+        delta = ((new Date()).getTime() - deltaBefore) / 1000;
+        deltaBefore = ((new Date()).getTime());
+
+        update(ctx, delta);
     }, 10);
 
     onNextTurn();
@@ -120,8 +142,10 @@ function onNextTurn() {
 function onMouseUp(e) {
     holdingPiece = false;
 
-    currentMove.posCol = Math.floor(e.offsetX / imageSize) + 1;
-    currentMove.posRow = Math.abs(8 - Math.floor(e.offsetY / imageSize));
+    let currentMove = {};
+
+    currentMove.posCol = Math.floor(e.offsetX / squareSize) + 1;
+    currentMove.posRow = Math.abs(8 - Math.floor(e.offsetY / squareSize));
 
     currentMove.from = letters[holdingPieceCoor.x] + "" + holdingPieceCoor.y;
     currentMove.to = letters[currentMove.posCol - 1] + "" + currentMove.posRow;
@@ -149,7 +173,7 @@ function onConnected() {
 }
 
 function onError(err) {
-    alert(err);
+    // todo handle
 }
 
 function onReceive(payload) {
@@ -160,25 +184,38 @@ function onReceive(payload) {
     }
 }
 
+function letterToCol(letter) {
+    for (let i = 0; i < letters.length; ++i) {
+        if (letter === letters[i]) {
+            return i + 1;
+        }
+    }
+}
+
 function onMoveResultReceived(message) {
-    if (message.actionResult === "InvalidMove") {
-        alert("Invalid Move!");
+    if (message.actionResult === "InvalidMove" || message.actionResult === "PieceDoesNotExist") {
+        showText("Invalid Move!");
     } else if (message.actionResult === "OutOfTurn") {
-        alert("Not your turn!");
+        showText("Not your turn!");
     } else if (message.actionResult === "InvalidMoveKingThreatened") {
-        alert("Your king is in danger!");
-    } else if (message.actionResult === "PieceDoesNotExist") {
-        alert("Not sure how but you move a non-existent piece!");
-    } else if (message.moveId === currentMove.id) {
+        showText("Your king is in danger!");
+    } else {
         let indicesToRemove = [];
+
+        let fromX = letterToCol(message.from.substr(0, 1));
+        let fromY = message.from.substr(1, 1);
+
+        let toX = letterToCol(message.to.substr(0, 1));
+        let toY = message.to.substr(1, 1);
+
 
         for (let pieceI = 0; pieceI < alivePieces.length; ++pieceI) {
             let piece = alivePieces[pieceI];
 
-            if (currentMove.x === piece.posCol && currentMove.y === piece.posRow) {
-                piece.posCol = currentMove.posCol;
-                piece.posRow = currentMove.posRow;
-            } else if (currentMove.posCol === piece.posCol && currentMove.posRow === piece.posRow) {
+            if (fromX == piece.posCol && fromY == piece.posRow) {
+                piece.posCol = toX;
+                piece.posRow = toY;
+            } else if (fromX === piece.posCol && fromY === piece.posRow) {
                 indicesToRemove.push(pieceI);
             }
         }
@@ -188,15 +225,21 @@ function onMoveResultReceived(message) {
         }
 
         if (message.actionResult === "Check") {
-            alert("Check");
+            showText("Check");
         }
 
         if (message.actionResult === "Checkmate") {
-            alert("Check");
+            showText("Checkmate");
         }
     }
 }
 
+function showText(text) {
+    textToShow = text;
+    textCountDownSecs = 2.0;
+}
 function getBackgroundColor(row, cell) {
-    return row % 2 === 0 ? (cell % 2 === 0 ? "#FFFFFF" : "#1440a9") : (cell % 2 === 0 ? "#1440a9" : "#FFFFFF");
+    return row % 2 === 0 ?
+        (cell % 2 === 0 ? "rgba(232, 235, 239, 1.0)" : "rgba(125, 135, 150, 1.0)") :
+        (cell % 2 === 0 ? "rgba(125, 135, 150, 1.0)" : "rgba(232, 235, 239, 1.0)");
 }
