@@ -41,6 +41,7 @@ public class GameRestController {
                 status != MoveResultStatus.PIECE_DOES_NOT_EXIST &&
                 status != MoveResultStatus.INVALID_MOVE_KING_THREATENED &&
                 status != MoveResultStatus.OUT_OF_TURN &&
+                status != MoveResultStatus.MOVING_OPPONENT_PIECE &&
                 status != MoveResultStatus.INVALID_MOVE);
 
         switch (status) {
@@ -56,6 +57,9 @@ public class GameRestController {
             case PIECE_DOES_NOT_EXIST:
                 result.setActionResult("PieceDoesNotExist");
                 break;
+            case MOVING_OPPONENT_PIECE:
+                result.setActionResult("MovingOpponentPiece");
+                break;
             case MOVED_TO_EMPTY:
                 result.setActionResult("EmptyCell");
                 break;
@@ -67,6 +71,9 @@ public class GameRestController {
                 break;
             case CHECKMATE:
                 result.setActionResult("Checkmate");
+                break;
+            case CASTLING_MOVE:
+                result.setActionResult("CastlingMove");
                 break;
         }
 

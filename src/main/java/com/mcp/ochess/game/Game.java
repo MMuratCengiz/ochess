@@ -78,6 +78,10 @@ public class Game {
         return status;
     }
 
+    public String lastEnPassantMoveKill() {
+        return board.lastEnPassantMoveKill();
+    }
+
     public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
         board.transformPawn(pawnPos, transformTo);
     }

@@ -1,45 +1,9 @@
+const debug = false;
+
 let holdingPiece = false;
 let holdingPieceCoor = {
     x: -1, y: -1
 };
-
-let alivePieces = [
-    {side: "wh", kind: "rook", posCol: 1, posRow: 1},
-    {side: "wh", kind: "knight", posCol: 2, posRow: 1},
-    {side: "wh", kind: "bishop", posCol: 3, posRow: 1},
-    {side: "wh", kind: "queen", posCol: 4, posRow: 1},
-    {side: "wh", kind: "king", posCol: 5, posRow: 1},
-    {side: "wh", kind: "bishop", posCol: 6, posRow: 1},
-    {side: "wh", kind: "knight", posCol: 7, posRow: 1},
-    {side: "wh", kind: "rook", posCol: 8, posRow: 1},
-
-    {side: "wh", kind: "pawn", posCol: 1, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 2, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 3, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 4, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 5, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 6, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 7, posRow: 2},
-    {side: "wh", kind: "pawn", posCol: 8, posRow: 2},
-
-    {side: "bl", kind: "rook", posCol: 1, posRow: 8},
-    {side: "bl", kind: "knight", posCol: 2, posRow: 8},
-    {side: "bl", kind: "bishop", posCol: 3, posRow: 8},
-    {side: "bl", kind: "queen", posCol: 4, posRow: 8},
-    {side: "bl", kind: "king", posCol: 5, posRow: 8},
-    {side: "bl", kind: "bishop", posCol: 6, posRow: 8},
-    {side: "bl", kind: "knight", posCol: 7, posRow: 8},
-    {side: "bl", kind: "rook", posCol: 8, posRow: 8},
-
-    {side: "bl", kind: "pawn", posCol: 1, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 2, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 3, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 4, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 5, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 6, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 7, posRow: 7},
-    {side: "bl", kind: "pawn", posCol: 8, posRow: 7},
-];
 
 const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
@@ -49,9 +13,12 @@ let gameSocket;
 let whitePlaying = false;
 let textCountDownSecs = 0.0;
 let textToShow = "";
-let imageHeight = 110;
-let squareSize = 130;
-let imageWidth = 63;
+
+const imageHeight = 110;
+const squareSize = 130;
+const imageWidth = 63;
+
+let board = new Board();
 
 function update(ctx, deltaTime) {
     for (let row = 0; row < 8; ++row) {
@@ -65,18 +32,24 @@ function update(ctx, deltaTime) {
         }
     }
 
-    for (let pieceI = 0; pieceI < alivePieces.length; ++pieceI) {
-        let piece = alivePieces[pieceI];
-        let pieceImg = document.getElementById(piece.side + "_" + piece.kind);
+    let pieces = board.getPositions();
 
-        if (holdingPiece && holdingPieceCoor.x + 1 === piece.posCol && holdingPieceCoor.y === piece.posRow) {
-            ctx.drawImage(pieceImg, mouseX - (squareSize / 2) + 30, mouseY - (squareSize / 2) + 5, imageWidth, imageHeight);
+    for (let pieceI = 0; pieceI < pieces.length; ++pieceI) {
+        let piece = pieces[pieceI];
+        let pieceImg = document.getElementById(piece["image"]);
+
+        let pieceX;
+        let pieceY;
+
+        if (holdingPiece && holdingPieceCoor.x + 1 === piece["posX"] && holdingPieceCoor.y === piece["posY"]) {
+            pieceX = mouseX - (squareSize / 2) + 30;
+            pieceY = mouseY - (squareSize / 2) + 5;
         } else {
-            ctx.drawImage(pieceImg,
-                (piece.posCol - 1) * squareSize + 30,
-                (Math.abs(8 - piece.posRow)) * squareSize + 10,
-                imageWidth, imageHeight);
+            pieceX = (piece["posX"] - 1) * squareSize + 30;
+            pieceY = (Math.abs(8 - piece["posY"])) * squareSize + 10;
         }
+
+        ctx.drawImage(pieceImg, pieceX, pieceY, imageWidth, imageHeight);
     }
 
 
@@ -188,14 +161,6 @@ function onReceive(payload) {
     }
 }
 
-function letterToCol(letter) {
-    for (let i = 0; i < letters.length; ++i) {
-        if (letter === letters[i]) {
-            return i + 1;
-        }
-    }
-}
-
 function onMoveResultReceived(message) {
     if (message.actionResult === "InvalidMove" || message.actionResult === "PieceDoesNotExist") {
         showText("Invalid Move!");
@@ -203,30 +168,16 @@ function onMoveResultReceived(message) {
         showText("Not your turn!");
     } else if (message.actionResult === "InvalidMoveKingThreatened") {
         showText("Your king is in danger!");
+    }  else if (message.actionResult === "MovingOpponentPiece") {
+        showText("That's not yours!");
     } else {
-        let indicesToRemove = [];
+        board.move(message.from, message.to);
 
-        let fromX = letterToCol(message.from.substr(0, 1));
-        let fromY = message.from.substr(1, 1);
-
-        let toX = letterToCol(message.to.substr(0, 1));
-        let toY = message.to.substr(1, 1);
-
-
-        for (let pieceI = 0; pieceI < alivePieces.length; ++pieceI) {
-            let piece = alivePieces[pieceI];
-
-            if (fromX == piece.posCol && fromY == piece.posRow) {
-                piece.posCol = toX;
-                piece.posRow = toY;
-            } else if (fromX === piece.posCol && fromY === piece.posRow) {
-                indicesToRemove.push(pieceI);
-            }
+        if (message.kill != null) {
+            board.kill(message.kill);
         }
 
-        for (let toRemoveI = indicesToRemove.length - 1; toRemoveI >= 0; toRemoveI--) {
-            alivePieces.splice(indicesToRemove[toRemoveI], 1);
-        }
+        handleCastling(message);
 
         if (message.actionResult === "Check") {
             showText("Check");
@@ -235,12 +186,37 @@ function onMoveResultReceived(message) {
         if (message.actionResult === "Checkmate") {
             showText("Checkmate");
         }
+
+        onNextTurn();
+    }
+}
+
+function handleCastling(message) {
+    if (message.actionResult === "CastlingMove") {
+
+        if (message.to === "G1") {
+            board.move("H1", "F1");
+        }
+
+        if (message.to === "C1") {
+            board.move("A1", "D1");
+        }
+
+        if (message.to === "G8") {
+            board.move("H8", "F8");
+        }
+
+        if (message.to === "C8") {
+            board.move("A8", "D8");
+        }
     }
 }
 
 function showText(text) {
-    textToShow = text;
-    textCountDownSecs = 2.0;
+    if (debug) {
+        textToShow = text;
+        textCountDownSecs = 2.0;
+    }
 }
 
 function getBackgroundColor(row, cell) {

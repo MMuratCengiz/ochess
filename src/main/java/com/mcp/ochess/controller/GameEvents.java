@@ -38,10 +38,12 @@ public class GameEvents {
     }
 
     @EventListener
-    public void handleClientConnect(SessionConnectedEvent event) {
+    public void handleClientConnect(SessionConnectedEvent event) throws OChessBaseException {
         synchronized (SYNC) {
             User user = (User) ((UsernamePasswordAuthenticationToken) event.getUser()).getPrincipal();
             int lobbyId = user.getPlayer().getInGameLobby().getId();
+            Game.ensureNewGame(lobbyId);
+
             HashMap<Side, String> sides = clients.get(lobbyId);
 
             if (sides == null) {
@@ -79,18 +81,19 @@ public class GameEvents {
 
             Side side = players.get(Side.White).equals(u.getName()) ? Side.White : Side.Black;
 
-            Game.ensureNewGame(action.getLobbyId());
             Game game = Game.getGame(action.getLobbyId());
             MoveResultStatus status = game.move(action.getFrom(), action.getTo(), side);
 
             MoveResult result = GameRestController.createMoveResult(status);
-            result.setMoveId(action.getMoveId());
-            result.setFrom(action.getFrom());
-            result.setTo(action.getTo());
+
+            if (status ==  MoveResultStatus.EN_PASSANT_MOVE) {
+                result.setKill(game.lastEnPassantMoveKill());
+            }
 
             if (result.isValidMove()) {
-                String opponent = players.get(side == Side.White ? Side.Black : Side.White);
-                messagingTemplate.convertAndSendToUser(opponent, "/app/lobby.move", result);
+                result.setMoveId(action.getMoveId());
+                result.setFrom(action.getFrom());
+                result.setTo(action.getTo());
             }
 
             return result;

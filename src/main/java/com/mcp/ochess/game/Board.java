@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class Board {
     private HashMap<Position, Piece> layout = new HashMap<>();
-
+    private String lastEnPassantMove;
     private Piece whiteKing;
     private Piece blackKing;
     private boolean testing;
@@ -156,10 +156,15 @@ public class Board {
         }
 
         if (enPassantMove != null) {
+            lastEnPassantMove = enPassantMove.movedPawnNewLoc.toString();
             return MoveResultStatus.EN_PASSANT_MOVE;
         }
 
         return MoveResultStatus.MOVED_TO_EMPTY;
+    }
+
+    public String lastEnPassantMoveKill() {
+        return lastEnPassantMove;
     }
 
     private void invalidateCastling(Position from, Piece piece) {

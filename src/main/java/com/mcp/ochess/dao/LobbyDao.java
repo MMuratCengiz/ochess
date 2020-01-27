@@ -28,11 +28,14 @@ public class LobbyDao {
 
     public void saveLobby(Lobby lobby) {
         ensureSession();
-        if (lobby.getPassword() != null) {
+        if (lobby.getPassword() != null && lobby.getPassword().length() > 0) {
             lobby.setPassword(
                     new BCryptPasswordEncoder().encode(lobby.getPassword())
             );
+        } else {
+            lobby.setPassword(null);
         }
+
         lobby.setCreatedDate(new Timestamp(System.currentTimeMillis()));
 
         try {

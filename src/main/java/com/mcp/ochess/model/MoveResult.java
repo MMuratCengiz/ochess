@@ -6,6 +6,7 @@ public class MoveResult extends ActionResult {
     private String moveId;
     private String from;
     private String to;
+    private String kill;
 
     public MoveResult() {
         super("MoveResult");
@@ -47,7 +48,15 @@ public class MoveResult extends ActionResult {
         return to;
     }
 
+    public String getKill() {
+        return kill;
+    }
+
     public void setTo(String to) {
         this.to = to;
+    }
+
+    public void setKill(String kill) {
+        this.kill = kill;
     }
 }

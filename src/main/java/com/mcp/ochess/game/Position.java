@@ -3,6 +3,8 @@ package com.mcp.ochess.game;
 import com.mcp.ochess.exceptions.OChessBaseException;
 
 public class Position {
+    private static final char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
+
     private int row;
     private int column;
 
@@ -46,5 +48,10 @@ public class Position {
         }
 
         return ((Position) obj).getColumn() == column && ((Position) obj).getRow() == row;
+    }
+
+    @Override
+    public String toString() {
+        return letters[column - 1] + "" + row ;
     }
 }
