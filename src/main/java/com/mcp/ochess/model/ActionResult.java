@@ -1,7 +1,13 @@
 package com.mcp.ochess.model;
 
-public enum ActionResult {
-    EnemyKill,
-    EmptyCell,
-    PawnConvert
+public class ActionResult {
+    protected String type;
+
+    public ActionResult(String type) {
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
 }

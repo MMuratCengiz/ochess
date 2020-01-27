@@ -79,7 +79,6 @@ public class Board {
         return layout.get(pos);
     }
 
-    // todo return the destroyed pieces, need it in the front end
     public MoveResultStatus move(Position from, Position to) throws OChessBaseException {
         if (awaitingPawnTransform) {
             throw new OChessBaseException("Transform the pawn before continuing to move.");
@@ -110,6 +109,8 @@ public class Board {
         if (castlingMove) {
             moveCastlingPieces(from, to);
             return MoveResultStatus.CASTLING_MOVE;
+        } else {
+            invalidateCastling(from, piece);
         }
 
         Piece tempToPiece = layout.get(to);
@@ -159,6 +160,32 @@ public class Board {
         }
 
         return MoveResultStatus.MOVED_TO_EMPTY;
+    }
+
+    private void invalidateCastling(Position from, Piece piece) {
+        if (piece.getKind() == PieceKind.Rook && from.getColumn() == 1 && piece.getSide() == Side.Black) {
+            blackLeftRookMoved = true;
+        }
+
+        if (piece.getKind() == PieceKind.Rook && from.getColumn() == 8 && piece.getSide() == Side.Black) {
+            blackRightRookMoved = true;
+        }
+
+        if (piece.getKind() == PieceKind.King && from.getColumn() == 5 && piece.getSide() == Side.Black) {
+            blackKingMoved = true;
+        }
+
+        if (piece.getKind() == PieceKind.Rook && from.getColumn() == 1 && piece.getSide() == Side.White) {
+            whiteLeftRookMoved = true;
+        }
+
+        if (piece.getKind() == PieceKind.Rook && from.getColumn() == 8 && piece.getSide() == Side.White) {
+            whiteRightRookMoved = true;
+        }
+
+        if (piece.getKind() == PieceKind.King && from.getColumn() == 5 && piece.getSide() == Side.White) {
+            whiteKingMoved = true;
+        }
     }
 
     public boolean tryCheckMate(Side side) throws OChessBaseException {
@@ -445,6 +472,12 @@ public class Board {
         }
 
         return pieces.get(0).getPosition();
+    }
+
+    // Risky use with caution
+    public void moveToNoCheck(Position from, Position to) {
+        this.layout.put(to, layout.get(from));
+        this.layout.remove(from);
     }
 
     // TESTING

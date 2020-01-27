@@ -182,6 +182,10 @@ function onReceive(payload) {
     if (message.type === "MoveResult") {
         onMoveResultReceived(message);
     }
+
+    if (message.type === "NoOpponent") {
+        showText("No opponent!");
+    }
 }
 
 function letterToCol(letter) {
@@ -238,6 +242,7 @@ function showText(text) {
     textToShow = text;
     textCountDownSecs = 2.0;
 }
+
 function getBackgroundColor(row, cell) {
     return row % 2 === 0 ?
         (cell % 2 === 0 ? "rgba(232, 235, 239, 1.0)" : "rgba(125, 135, 150, 1.0)") :

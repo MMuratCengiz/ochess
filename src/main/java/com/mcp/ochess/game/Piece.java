@@ -263,8 +263,19 @@ class King extends Piece {
     boolean isValidMove(Position to) {
         Piece pieceAtLoc = board.getPiece(to);
 
-        if (board.isCellThreatened(to, oppositeSide()) || (pieceAtLoc != null
-                && pieceAtLoc.getSide() != oppositeSide())) {
+
+        if ((pieceAtLoc == null || pieceAtLoc.getSide() == oppositeSide())) {
+            try {
+                board.moveToNoCheck(position, to);
+                if (board.isCellThreatened(to, oppositeSide())) {
+                    return false;
+                }
+            } finally {
+                board.moveToNoCheck(to, position);
+            }
+        }
+
+        if (pieceAtLoc != null) {
             return false;
         }
 

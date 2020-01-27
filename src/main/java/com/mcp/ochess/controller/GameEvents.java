@@ -4,10 +4,7 @@ import com.mcp.ochess.exceptions.OChessBaseException;
 import com.mcp.ochess.game.Game;
 import com.mcp.ochess.game.MoveResultStatus;
 import com.mcp.ochess.game.Side;
-import com.mcp.ochess.model.Lobby;
-import com.mcp.ochess.model.MoveAction;
-import com.mcp.ochess.model.MoveResult;
-import com.mcp.ochess.model.User;
+import com.mcp.ochess.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.Header;
@@ -69,30 +66,34 @@ public class GameEvents {
 
     @MessageMapping("/lobby.move")
     @SendTo("/ingame")
-    public MoveResult move(@Payload MoveAction action, Principal user, @Header("simpSessionId") String sessionId)
+    public ActionResult move(@Payload MoveAction action, Principal user, @Header("simpSessionId") String sessionId)
             throws OChessBaseException {
         // Need to make this autoload state.
-        User u = (User) ((UsernamePasswordAuthenticationToken) user).getPrincipal();
-        HashMap<Side, String> players = clients.get(u.getPlayer().getInGameLobby().getId());
+        synchronized (SYNC) {
+            User u = (User) ((UsernamePasswordAuthenticationToken) user).getPrincipal();
+            HashMap<Side, String> players = clients.get(u.getPlayer().getInGameLobby().getId());
 
-        if (! players.containsKey(Side.Black)) {
-             // todo return no opponent
+            if (players.size() != 2) {
+                return new ActionResult("NoOpponent");
+            }
+
+            Side side = players.get(Side.White).equals(u.getName()) ? Side.White : Side.Black;
+
+            Game.ensureNewGame(action.getLobbyId());
+            Game game = Game.getGame(action.getLobbyId());
+            MoveResultStatus status = game.move(action.getFrom(), action.getTo(), side);
+
+            MoveResult result = GameRestController.createMoveResult(status);
+            result.setMoveId(action.getMoveId());
+            result.setFrom(action.getFrom());
+            result.setTo(action.getTo());
+
+            if (result.isValidMove()) {
+                String opponent = players.get(side == Side.White ? Side.Black : Side.White);
+                messagingTemplate.convertAndSendToUser(opponent, "/app/lobby.move", result);
+            }
+
+            return result;
         }
-
-        Side side = players.get(Side.White).equals(u.getName()) ? Side.White : Side.Black;
-
-        Game.ensureNewGame(action.getLobbyId());
-        Game game = Game.getGame(action.getLobbyId());
-        MoveResultStatus status = game.move(action.getFrom(), action.getTo(), null);
-
-        MoveResult result = GameRestController.createMoveResult(status);
-        result.setMoveId(action.getMoveId());
-        result.setFrom(action.getFrom());
-        result.setTo(action.getTo());
-
-        String opponent = players.get(side == Side.White ? Side.Black : Side.White);
-        messagingTemplate.convertAndSendToUser(opponent, "/app/lobby.move", result);
-
-        return result;
     }
 }
