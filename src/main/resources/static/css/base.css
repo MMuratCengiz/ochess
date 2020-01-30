@@ -1,67 +1,13 @@
-.ochess-title {
-    font-size: 54pt;
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-}
-
 body {
     overflow-x: hidden;
-    background-color: rgba(20, 220,  215, 0.01);
-}
-
-#sidebar-wrapper {
-    min-height: 100vh;
-    margin-left: -15rem;
-    -webkit-transition: margin .25s ease-out;
-    -moz-transition: margin .25s ease-out;
-    -o-transition: margin .25s ease-out;
-    transition: margin .25s ease-out;
-}
-
-.authBox {
-    border: 1px solid rgba(0, 0, 0, 0.6);
-    border-radius: 20px;
-    margin-top: 20%;
-    padding: 30px;
-    width: 100%;
-    background-color: rgba(20, 30, 80, 0.15);
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 16pt !important;
+    background-color: rgba(0, 100, 211, 0.05) !important;
 }
 
 .error {
     color: darkred;
 }
 
-.authBox input {
-    width: 100%;
-}
-
-#sidebar-wrapper .sidebar-heading {
-    padding: 0.875rem 1.25rem;
-    font-size: 1.2rem;
-}
-
-#sidebar-wrapper .list-group {
-    width: 15rem;
-}
-
-#page-content-wrapper {
-    min-width: 100vw;
-}
-
-#wrapper.toggled #sidebar-wrapper {
-    margin-left: 0;
-}
-
 @media (min-width: 768px) {
-    #sidebar-wrapper {
-        margin-left: 0;
-    }
-
-    #page-content-wrapper {
-        min-width: 0;
-        width: 100%;
-    }
-
-    #wrapper.toggled #sidebar-wrapper {
-        margin-left: -15rem;
-    }
 }

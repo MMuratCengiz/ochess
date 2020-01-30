@@ -2,32 +2,22 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <title>Login to OChess</title>
-    <div th:replace="ref :: referrence"></div>
+    <link th:href="@{/css/auth.css}" rel="stylesheet" type="text/css" />
+    <th:fragment th:replace="ref :: referrence"></th:fragment>
 </head>
 <body>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md"></div>
-        <div class="col-md">
-            <form class="authBox" th:action="@{/login}" method="POST">
-                <div class="form-group">
-                    <label for="loginUser" style="color: black;">User: </label>
-                    <input type="text" class="form-control" id="loginUser" aria-describedby="emailHelp"
-                           placeholder="Enter username" name="username">
-                </div>
-                <div class="form-group">
-                    <label for="loginPass" style="color: black;">Password: </label>
-                    <input type="password" name="password" class="form-control" id="loginPass" placeholder="Password">
-                </div>
-                <span class="error" th:text="${error}"></span><br/><br/>
-                <button type="submit" class="btn btn-primary mt-10">Login</button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.href = '/register';">
-                    Register instead</button>
-            </form>
-        </div>
-        <div class="col-md"></div>
-    </div>
+<div class="container25 top5">
+    <form class="authBox" th:action="@{/login}" method="POST">
+        <label for="loginUser" style="color: black;">User: </label><br/>
+        <input type="text" class="base-input" id="loginUser" aria-describedby="emailHelp"
+               placeholder="Enter username" name="username"><br/>
+        <label for="loginPass" style="color: black;">Password: </label><br/>
+        <input type="password" name="password" class="base-input" id="loginPass" placeholder="Password"><br/>
+        <span class="error" th:text="${error}"></span><br/>
+        <button type="submit" class="base-input base-button">LOGIN</button><br/>
+        <a th:href="@{/register}">No account? register instead.</a><br/>
+    </form>
 </div>
 </body>
 </html>

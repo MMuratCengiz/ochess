@@ -1,0 +1,48 @@
+.top5 {
+    margin-top: 5%;
+}
+
+.container25 {
+    width: 100%;
+    height: 25%;
+}
+
+.authBox {
+    width: 355px;
+    margin-left: 40%;
+    padding: 50px;
+    border: 1px solid black;
+    border-radius: 0px;
+    background-color: rgba(20, 133, 175, 0.1);
+}
+
+.base-input {
+    padding: 8px;
+    border-radius: 0px;
+    border: 1px solid rgba(20, 20, 20, 0.2);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 12pt;
+}
+
+.base-button {
+    background-color: rgba(20, 176, 155, 0.5);
+}
+
+.base-button:hover {
+    background-color: rgba(20, 176, 155, 0.9);
+}
+
+.authBox input {
+    width: 250px;
+}
+
+.authBox button {
+    width: 250px;
+    font-weight: bolder;
+    font-size: 14pt;
+}
+
+.authBox a {
+    font-size: 10pt;
+}

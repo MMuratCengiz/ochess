@@ -2,39 +2,28 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <title>Register</title>
-    <div th:replace="ref :: referrence"></div>
+    <link th:href="@{/css/auth.css}" rel="stylesheet" type="text/css" />
+    <th:fragment th:replace="ref :: referrence"></th:fragment>
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div class="col-md"></div>
-        <div class="col-md">
-            <form th:action="@{/register}" method="POST" class="authBox" th:object="${user}">
-                <div class="form-group">
-                    <label for="registerUser" style="color: black;">User: </label>
-                    <input type="text" class="form-control" id="registerUser" aria-describedby="emailHelp"
-                           placeholder="Enter username" th:field="*{name}">
-                    <span class="error" th:each="error: ${#fields.errors('name')}" th:text="${error}"></span>
-                </div>
-                <div class="form-group">
-                    <label for="registerPass" style="color: black;">Password: </label>
-                    <input type="password" class="form-control" id="registerPass" placeholder="Password"
-                           th:field="*{password}">
-                    <span class="error" th:each="error: ${#fields.errors('password')}" th:text="${error}"></span>
-                </div>
-                <div class="form-group">
-                    <label for="registerPassVerification" style="color: black;">Re-enter password: </label>
-                    <input type="password" class="form-control" id="registerPassVerification"
-                           placeholder="Password again"
-                           th:field="*{matchingPassword}">
-                </div>
-                <button type="submit" class="btn btn-primary">Register</button>
-                <button type="button" class="btn btn-secondary" onclick="window.location.href = '/login';">
-                    Login instead</button>
-            </form>
-        </div>
-        <div class="col-md"></div>
-    </div>
+<div class="container25 top5">
+    <form th:action="@{/register}" method="POST" class="authBox" th:object="${user}">
+        <label for="registerUser" style="color: black;">User: </label>
+        <input type="text" class="base-input" id="registerUser" aria-describedby="emailHelp"
+               placeholder="Enter username" th:field="*{name}">
+        <span class="error" th:each="error: ${#fields.errors('name')}" th:text="${error}"></span>
+        <label for="registerPass" style="color: black;">Password: </label>
+        <input type="password" class="base-input" id="registerPass" placeholder="Password"
+               th:field="*{password}">
+        <span class="error" th:each="error: ${#fields.errors('password')}" th:text="${error}"></span>
+        <label for="registerPassVerification" style="color: black;">Re-enter password: </label>
+        <input type="password" class="base-input" id="registerPassVerification"
+               placeholder="Password again"
+               th:field="*{matchingPassword}">
+        <button type="submit" class="base-input base-button">Register</button>
+        <a th:href="@{/login}">Already registered? login instead.</a><br/>
+
+    </form>
 </div>
 </body>
 </html>

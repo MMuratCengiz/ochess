@@ -160,6 +160,11 @@ public class RootController {
         return "redirect:/profile";
     }
 
+    @GetMapping("/gamev2")
+    public String gameV2() {
+        return "gamev2";
+    }
+
     @PostMapping(value = "/login")
     public String login(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Errors errors,
                         Model model, HttpSession session) {

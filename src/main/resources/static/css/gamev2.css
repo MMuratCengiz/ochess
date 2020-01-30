@@ -1,0 +1,38 @@
+#topBar {
+    width: 100%;
+}
+
+#topBar .tbContainer a {
+    cursor: pointer;
+    margin-left: 20px;
+    margin-right: 10px;
+    display: inline-block;
+    text-decoration: none;
+}
+
+#topBar .tbContainer a:visited .glyphicon {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+#topBar .tbContainer a:link .glyphicon {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+#topBar .tbContainer a:hover .glyphicon {
+    color: rgba(0, 0, 0, 1);
+}
+
+#topBar .tbContainer a .glyphicon {
+    font-size: 54pt;
+}
+
+
+#topBar .tbContainer {
+    float: right;
+}
+
+#navigationDetails {
+    float: right;
+    margin-right: 20px;
+    font-size: 24pt;
+}

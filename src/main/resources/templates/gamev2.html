@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Join a game</title>
+    <script th:src="@{/js/layout.js}" type="application/javascript"></script>
+    <link th:href="@{/css/gamev2.css}" rel="stylesheet" type="text/css" />
+    <th:fragment th:replace="ref :: referrence"></th:fragment>
+</head>
+<body onload="onLoad()">
+<div id="topBar">
+    <div class="tbContainer">
+        <a
+                onmouseenter="showNav('INFO')"
+                onmouseleave="hideNav()">
+        <span
+                class="glyphicon glyphicon-info-sign"
+                aria-hidden="true">
+        </span></a>
+
+        <a
+                onmouseenter="showNav('SURRENDER')"
+                onmouseleave="hideNav()">
+        <span
+                class="glyphicon glyphicon-remove-circle"
+                aria-hidden="true">
+        </span></a>
+
+        <a
+                onmouseenter="showNav('HELP')"
+                onmouseleave="hideNav()">
+        <span
+                class="glyphicon glyphicon-question-sign"
+                aria-hidden="true">
+        </span></a>
+
+        <a
+                onmouseenter="showNav('LOGOUT')"
+                onmouseleave="hideNav()">
+        <span
+                class="glyphicon glyphicon-log-out"
+                aria-hidden="true">
+        </span></a> <br /> <br />
+
+        <b id="navigationDetails"></b>
+    </div>
+</div>
+</body>
+</html>
