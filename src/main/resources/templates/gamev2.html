@@ -3,13 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>Join a game</title>
-    <script th:src="@{/js/layout.js}" type="application/javascript"></script>
-    <link th:href="@{/css/gamev2.css}" rel="stylesheet" type="text/css" />
     <th:fragment th:replace="ref :: referrence"></th:fragment>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let lobbyId = /*[[${lobbyId}]]*/ 0;
+        let user = /*[[${User.getName()}]]*/ 0;
+        /*]]>*/
+    </script>
+    <script th:src="@{/js/board.js}" type="application/javascript"></script>
+    <script th:src="@{/js/layout.js}" type="application/javascript"></script>
+    <script th:src="@{/js/game.js}" type="application/javascript"></script>
+    <link th:href="@{/css/gamev2.css}" rel="stylesheet" type="text/css" />
 </head>
 <body onload="onLoad()">
 <div id="topBar">
     <div class="tbContainer">
+        <h1 style="float: left; font-size: 48pt">
+            <span class="glyphicon glyphicon-king" aria-hidden="true"></span>
+            Online Chess
+            <span class="glyphicon glyphicon-queen" aria-hidden="true"></span>
+        </h1>
+        <a
+                onmouseenter="showNav('LOGOUT')"
+                onmouseleave="hideNav()" th:href="@{/logout}">
+        <span
+                class="glyphicon glyphicon-log-out"
+                aria-hidden="true">
+        </span></a>
         <a
                 onmouseenter="showNav('INFO')"
                 onmouseleave="hideNav()">
@@ -18,9 +38,10 @@
                 aria-hidden="true">
         </span></a>
 
+
         <a
                 onmouseenter="showNav('SURRENDER')"
-                onmouseleave="hideNav()">
+                onmouseleave="hideNav()" th:if="${ingame}" th:href="@{/surrender}">
         <span
                 class="glyphicon glyphicon-remove-circle"
                 aria-hidden="true">
@@ -32,74 +53,103 @@
         <span
                 class="glyphicon glyphicon-question-sign"
                 aria-hidden="true">
-        </span></a>
-
-        <a
-                onmouseenter="showNav('LOGOUT')"
-                onmouseleave="hideNav()">
-        <span
-                class="glyphicon glyphicon-log-out"
-                aria-hidden="true">
         </span></a> <br /> <br />
 
         <b id="navigationDetails"></b>
-
-        <th:block th:if="${!ingame}">
-            <table class="table table-striped table-bordered">
-                <thead class="thead-dark">
-                <tr>
-                    <th>#</th>
-                    <th>Date Created</th>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Players</th>
-                    <th>Password</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <th:block th:each="lobby: ${lobbies}">
-                    <tr>
-                        <td th:utext="${lobby.getId()}"></td>
-                        <td th:utext="${lobby.getCreatedDate().toGMTString()}"></td>
-                        <td th:utext="${lobby.getName()}"></td>
-                        <td th:utext="${lobby.getType() == 1 ? 'Normal' : 'Ranked'}"></td>
-
-                        <td th:utext="${lobby.getBlackUser() == null && lobby.getWhiteUser() == null ? '0/2'
-                        : (lobby.getWhiteUser() != null && lobby.getBlackUser() != null ? '2/2' : '1/2') }"></td>
-                        <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
-                            <td>
-                                <input type="password" class="form-control" name="password" placeholder="Lobby password..."
-                                       th:if="${lobby.getPassword() != null}">
-                                <span th:if="${lobby.getPassword() == null}">No password</span>
-                                <span class="error" th:if="${error.length() > 0 && lobby.getId() == errorLobbyId}" th:utext="${error}"></span>
-                            </td>
-                            <td>
-                                <input type="hidden" name="id" th:value="${lobby.getId()}" />
-                                <button class="btn btn-dark" type="submit" th:field="*{id}" th:text="JOIN"></button>
-                            </td>
-                        </form>
-
-                    </tr>
-                </th:block>
-                <tr>
-                    <form th:action="@{/lobby}" method="POST" th:object="${lobby}">
-                        <td></td>
-                        <td></td>
-                        <td><input type="text" class="form-control" name="name" placeholder="Lobby name..." th:field="*{name}"></td>
-                        <td>
-                            <select class="custom-select" name="type" th:field="*{type}">
-                                <option selected value="1">Normal</option>
-                                <option value="2">Ranked</option>
-                            </select>
-                        </td>
-                        <td></td>
-                        <td><input type="password" class="form-control" name="password" placeholder="Lobby password..." th:field="*{password}"></td>
-                        <td><button class="btn btn-dark" type="submit" th:text="CREATE"></button> </td>
-                    </form>
-                </tr>
-            </table>
-        </th:block>
     </div>
+</div>
+<th:div id="lobbies" th:unless="${ingame}">
+    <form th:action="@{/gamev2}" method="GET" style="float: left;">
+        <input type="search" placeholder="Search for games.." name="search" class="base-input"/>
+    </form>
+    <div style="float: right;">
+        <span>Show per page:  </span>
+        <form th:action="@{/gamev2}" method="GET" style="display: inline;">
+            <select class="base-input" name="limit" onchange="this.form.submit()">
+                <option th:selected="${limit == 10}">10</option>
+                <option th:selected="${limit == 25}">25</option>
+                <option th:selected="${limit == 50}">50</option>
+                <option th:selected="${limit == 100}">100</option>
+            </select>
+        </form>
+    </div> <br/> <br/>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Date Created</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Players</th>
+            <th>Password</th>
+            <th></th>
+        </tr>
+        </thead>
+        <th:block th:each="lobby: ${lobbies}">
+            <tr>
+                <td th:utext="${lobby.getId()}"></td>
+                <td th:utext="${lobby.getCreatedDate().toGMTString()}"></td>
+                <td th:utext="${lobby.getName()}"></td>
+                <td th:utext="${lobby.getType() == 1 ? 'Normal' : 'Ranked'}"></td>
+
+                <td th:utext="${lobby.getBlackUser() == null && lobby.getWhiteUser() == null ? '0/2'
+                        : (lobby.getWhiteUser() != null && lobby.getBlackUser() != null ? '2/2' : '1/2') }"></td>
+                <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
+                    <td>
+                        <input type="password" class="base-input" name="password" placeholder="Lobby password..."
+                               th:if="${lobby.getPassword() != null}">
+                        <span th:if="${lobby.getPassword() == null}">No password</span>
+                        <span class="error" th:if="${error.length() > 0 && lobby.getId() == errorLobbyId}" th:utext="${error}"></span>
+                    </td>
+                    <td>
+                        <input type="hidden" name="id" th:value="${lobby.getId()}" />
+                        <button class="base-input base-button" type="submit" th:field="*{id}" th:text="JOIN"></button>
+                    </td>
+                </form>
+
+            </tr>
+        </th:block>
+        <tr>
+            <form th:action="@{/lobby}" method="POST" th:object="${lobby}">
+                <td></td>
+                <td></td>
+                <td><input type="text" class="base-input" name="name" placeholder="Lobby name..." th:field="*{name}"></td>
+                <td>
+                    <select class="base-input" name="type" th:field="*{type}">
+                        <option selected value="1">Normal</option>
+                        <option value="2">Ranked</option>
+                    </select>
+                </td>
+                <td></td>
+                <td><input type="password" class="base-input" name="password" placeholder="Lobby password..." th:field="*{password}"></td>
+                <td><button class="base-input base-button" type="submit" th:text="CREATE"></button> </td>
+            </form>
+        </tr>
+    </table>
+    <a style="float: left;color: black;" th:href="'?page=' + (${page} - 1) + '&limit=' + ${limit}" th:if="${page != 0}">< Previous Page</a>
+    <a style="float: right;color: black;" th:href="'?page=' + (${page} + 1) + '&limit=' + ${limit}">Next Page ></a>
+</th:div>
+
+<div id="gameContainer" th:if="${ingame}">
+    <span id="whitePlayer" class="playerLabel" th:utext="${lobby.getWhiteUser().getName()}"></span>
+    <span id="blackPlayer" class="playerLabel" th:utext="${lobby.getBlackUser() == null ? 'Not Here' : lobby.getBlackUser().getName()}"></span>
+
+    <canvas id="board" width="1040px" height="1040px">
+        <img id="wh_pawn" th:src="@{/images/wh_pawn.png}" />
+        <img id="bl_pawn" th:src="@{/images/bl_pawn.png}" />
+        <img id="wh_rook" th:src="@{/images/wh_rook.png}" />
+        <img id="bl_rook" th:src="@{/images/bl_rook.png}" />
+        <img id="wh_king" th:src="@{/images/wh_king.png}" />
+        <img id="bl_king" th:src="@{/images/bl_king.png}" />
+        <img id="wh_knight" th:src="@{/images/wh_knight.png}" />
+        <img id="bl_knight" th:src="@{/images/bl_knight.png}" />
+        <img id="wh_bishop" th:src="@{/images/wh_bishop.png}" />
+        <img id="bl_bishop" th:src="@{/images/bl_bishop.png}" />
+        <img id="wh_queen" th:src="@{/images/wh_queen.png}" />
+        <img id="bl_queen" th:src="@{/images/bl_queen.png}" />
+        <p>plain html support coming never</p>
+    </canvas>
 </div>
 </body>
 </html>

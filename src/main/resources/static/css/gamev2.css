@@ -2,20 +2,41 @@
     width: 100%;
 }
 
+.tbContainer {
+    width: 100%;
+    height: 120px;
+    background-color: whitesmoke;
+    border-bottom-width: 10px;
+    border-bottom-style: solid;
+    border-bottom-color: rgba(0,0,0, 0.75);
+}
+
 #topBar .tbContainer a {
-    cursor: pointer;
     margin-left: 20px;
     margin-right: 10px;
+    float: right;
+}
+
+a {
+    cursor: pointer;
     display: inline-block;
     text-decoration: none;
 }
 
+a:hover {
+    text-decoration: none;
+}
+
+#topBar .tbContainer a .glyphicon {
+    color: rgba(0, 0, 0, 1);
+}
+
 #topBar .tbContainer a:visited .glyphicon {
-    color: rgba(0, 0, 0, 0.8);
+    color: rgba(0, 0, 0, 1);
 }
 
 #topBar .tbContainer a:link .glyphicon {
-    color: rgba(0, 0, 0, 0.8);
+    color: rgba(0, 0, 0, 1);
 }
 
 #topBar .tbContainer a:hover .glyphicon {
@@ -23,7 +44,7 @@
 }
 
 #topBar .tbContainer a .glyphicon {
-    font-size: 54pt;
+    font-size: 36pt;
 }
 
 
@@ -35,4 +56,67 @@
     float: right;
     margin-right: 20px;
     font-size: 24pt;
+}
+
+#lobbies {
+    position: fixed;
+    top: 120px;
+    width: 90%;
+    margin-left: 5%;
+    background-color: whitesmoke;
+    padding: 100px 20px 20px 20px;
+}
+
+#lobbies table th {
+    background-image: url('/images/bg.png');
+    color: white;
+    padding: 10px;
+    width: 20%;
+}
+
+#lobbies table td {
+    padding: 10px;
+}
+
+#lobbies table tr:nth-child(even) {
+    background-color: darkgray;
+}
+
+#gameContainer {
+    margin-left: 50px;
+    background-color: whitesmoke;
+    width: calc(100% - 100px);
+    height: 1200px;
+    padding: 20px;
+}
+
+#board {
+    display: inline-block;
+    border: 2px solid black;
+    position: fixed;
+    top: 140px;
+    left: 262px;
+}
+
+.playerLabel {
+    display: inline-block;
+    position: fixed;
+    width: 200px;
+    border: 2px solid black;
+    left: 60px;
+    font-size: 16pt;
+    text-align: center;
+    vertical-align: center;
+}
+
+#whitePlayer {
+    top: 1150px;
+    background-color: white;
+    color: black;
+}
+
+#blackPlayer {
+    top: 140px;
+    background-color: black;
+    color: white;
 }

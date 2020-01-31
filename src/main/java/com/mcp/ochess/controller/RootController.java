@@ -1,5 +1,6 @@
 package com.mcp.ochess.controller;
 
+import ch.qos.logback.classic.gaffer.AppenderDelegate;
 import com.mcp.ochess.dao.LobbyDao;
 import com.mcp.ochess.dao.OChessUserDetailsService;
 import com.mcp.ochess.exceptions.OChessBaseException;
@@ -85,10 +86,11 @@ public class RootController {
 
         if (errors == null) {
             Game.createNewGame(lobby.getId());
-            return "redirect:/ingame";
+            model.addAttribute("ingame", "true");
+            return "redirect:/gamev2";
         }
 
-        return "redirect:/lobby";
+        return "redirect:/gamev2";
     }
 
     @PostMapping("/join")
@@ -119,26 +121,11 @@ public class RootController {
         userService.getDao().updatePlayer(user.getPlayer());
         user.getPlayer().setInGameLobby(lobby);
 
-        if (errors != null) {
-            return "redirect:/ingame";
+        if (errors == null) {
+            model.addAttribute("error", "");
         }
 
-        model.addAttribute("error", "");
-        return "redirect:/lobby";
-    }
-
-    @GetMapping(value = "/profile")
-    public String showProfile(Model model, HttpSession session) {
-        initModel(model, session);
-        model.addAttribute("activeTab", "profile");
-        return "profile";
-    }
-
-    @RequestMapping("/help")
-    public String help(Model model, HttpSession session) {
-        initModel(model, session);
-        model.addAttribute("activeTab", "help");
-        return "help";
+        return "redirect:/gamev2";
     }
 
     @RequestMapping("/accessdenied")
@@ -157,7 +144,7 @@ public class RootController {
 
     @GetMapping("/loginsuccess")
     public String loginSuccess() {
-        return "redirect:/profile";
+        return "redirect:/gamev2";
     }
 
     @GetMapping("/gamev2")
@@ -165,7 +152,7 @@ public class RootController {
         initModel(model, session);
 
         Object inGame = model.getAttribute("ingame");
-        if (inGame != null && ! (Boolean) inGame) {
+        if (inGame == null || ! (Boolean) inGame) {
             listLobbies(request, model, session);
         }
 
@@ -235,6 +222,7 @@ public class RootController {
         if (user.getPlayer().getInGameLobby() != null) {
             m.addAttribute("ingame", true);
             m.addAttribute("lobbyId", user.getPlayer().getInGameLobby().getId());
+            m.addAttribute("lobby", user.getPlayer().getInGameLobby());
         }
     }
 }

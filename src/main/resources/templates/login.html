@@ -14,7 +14,7 @@
                placeholder="Enter username" name="username"><br/>
         <label for="loginPass" style="color: black;">Password: </label><br/>
         <input type="password" name="password" class="base-input" id="loginPass" placeholder="Password"><br/>
-        <span class="error" th:text="${error}"></span><br/>
+        <span class="error" th:text="${error}"></span>
         <button type="submit" class="base-input base-button">LOGIN</button><br/>
         <a th:href="@{/register}">No account? register instead.</a><br/>
     </form>
