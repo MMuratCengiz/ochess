@@ -161,7 +161,14 @@ public class RootController {
     }
 
     @GetMapping("/gamev2")
-    public String gameV2() {
+    public String gameV2(WebRequest request, Model model, HttpSession session) {
+        initModel(model, session);
+
+        Object inGame = model.getAttribute("ingame");
+        if (inGame != null && ! (Boolean) inGame) {
+            listLobbies(request, model, session);
+        }
+
         return "gamev2";
     }
 
@@ -189,7 +196,7 @@ public class RootController {
 
 
     @RequestMapping("/ingame")
-    public String home(Model model, HttpSession session) {
+    public String ingame(Model model, HttpSession session) {
         initModel(model, session);
         SecurityContextHolder.getContext().getAuthentication().getCredentials();
         model.addAttribute("activeTab", "ingame");

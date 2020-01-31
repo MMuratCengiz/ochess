@@ -43,6 +43,62 @@
         </span></a> <br /> <br />
 
         <b id="navigationDetails"></b>
+
+        <th:block th:if="${!ingame}">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Date Created</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Players</th>
+                    <th>Password</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <th:block th:each="lobby: ${lobbies}">
+                    <tr>
+                        <td th:utext="${lobby.getId()}"></td>
+                        <td th:utext="${lobby.getCreatedDate().toGMTString()}"></td>
+                        <td th:utext="${lobby.getName()}"></td>
+                        <td th:utext="${lobby.getType() == 1 ? 'Normal' : 'Ranked'}"></td>
+
+                        <td th:utext="${lobby.getBlackUser() == null && lobby.getWhiteUser() == null ? '0/2'
+                        : (lobby.getWhiteUser() != null && lobby.getBlackUser() != null ? '2/2' : '1/2') }"></td>
+                        <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
+                            <td>
+                                <input type="password" class="form-control" name="password" placeholder="Lobby password..."
+                                       th:if="${lobby.getPassword() != null}">
+                                <span th:if="${lobby.getPassword() == null}">No password</span>
+                                <span class="error" th:if="${error.length() > 0 && lobby.getId() == errorLobbyId}" th:utext="${error}"></span>
+                            </td>
+                            <td>
+                                <input type="hidden" name="id" th:value="${lobby.getId()}" />
+                                <button class="btn btn-dark" type="submit" th:field="*{id}" th:text="JOIN"></button>
+                            </td>
+                        </form>
+
+                    </tr>
+                </th:block>
+                <tr>
+                    <form th:action="@{/lobby}" method="POST" th:object="${lobby}">
+                        <td></td>
+                        <td></td>
+                        <td><input type="text" class="form-control" name="name" placeholder="Lobby name..." th:field="*{name}"></td>
+                        <td>
+                            <select class="custom-select" name="type" th:field="*{type}">
+                                <option selected value="1">Normal</option>
+                                <option value="2">Ranked</option>
+                            </select>
+                        </td>
+                        <td></td>
+                        <td><input type="password" class="form-control" name="password" placeholder="Lobby password..." th:field="*{password}"></td>
+                        <td><button class="btn btn-dark" type="submit" th:text="CREATE"></button> </td>
+                    </form>
+                </tr>
+            </table>
+        </th:block>
     </div>
 </div>
 </body>
