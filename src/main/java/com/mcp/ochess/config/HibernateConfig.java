@@ -21,11 +21,11 @@ import java.util.Properties;
 @EnableTransactionManagement
 @Import({ OChessWebSecurityConfigurerAdapter.class })
 public class HibernateConfig  {
-    @Bean
+    @Bean(name = "entityManagerFactory")
     public LocalSessionFactoryBean getSessionFactory() {
         LocalSessionFactoryBean bean = new LocalSessionFactoryBean();
         bean.setDataSource(getDataSource());
-        bean.setPackagesToScan("com.mcp.ochess.model");
+        bean.setPackagesToScan("com.mcp.ochess");
         bean.setHibernateProperties(getProperties());
         return bean;
     }
@@ -36,7 +36,7 @@ public class HibernateConfig  {
         return properties;
     }
 
-    @Bean
+    @Bean(name = "transactionManager")
     public PlatformTransactionManager getTransactionManager() {
         HibernateTransactionManager manager = new HibernateTransactionManager();
         manager.setSessionFactory(getSessionFactory().getObject());

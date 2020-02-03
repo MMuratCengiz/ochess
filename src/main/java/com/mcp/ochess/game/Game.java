@@ -45,6 +45,14 @@ public class Game {
         }
     }
 
+    public static void endGame(int lobbyId) {
+        synchronized (SYNC) {
+            if (games.containsKey(lobbyId)) {
+                games.remove(lobbyId);
+            }
+        }
+    }
+
     // True means checkMate
     public MoveResultStatus move(String from, String to, Side side) throws OChessBaseException {
         Piece piece = board.getPiece(Position.fromString(from));
@@ -82,11 +90,19 @@ public class Game {
         return board.lastEnPassantMoveKill();
     }
 
-    public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
-        board.transformPawn(pawnPos, transformTo);
+    public PawnTransformStatus transformPawn(PieceKind transformTo, Side side) throws OChessBaseException {
+        return board.transformPawn(transformTo, side);
+    }
+
+    public Position getPieceWaitingTransform() {
+        return board.pieceWaitingTransform();
     }
 
     public boolean validateTurn(Side userSide) {
         return turn == userSide;
+    }
+
+    public String marshallBoard() {
+        return board.marshall();
     }
 }

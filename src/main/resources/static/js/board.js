@@ -39,6 +39,44 @@ class Board {
         };
     }
 
+    load(marshalledBoard) {
+        this.layout = {}; // Reset layout
+
+        let mbc = Array.from(marshalledBoard);
+        for (let index = 0; index < mbc.length; index += 4) {
+            let pos = mbc[index] + mbc[index + 1];
+            let piece = {};
+
+            piece.posX = this.letterToCol(mbc[index]);
+            piece.posY = parseInt(mbc[index + 1]  + "", 10);
+
+            let side = mbc[index + 2] == 'B' ? "bl" : "wh";
+
+            switch (mbc[index + 3]) {
+                case 'P':
+                    piece.image = side + "_" + "pawn";
+                    break;
+                case 'Q':
+                    piece.image = side + "_" + "queen";
+                    break;
+                case 'X':
+                    piece.image = side + "_" + "king";
+                    break;
+                case 'R':
+                    piece.image = side + "_" + "rook";
+                    break;
+                case 'B':
+                    piece.image = side + "_" + "bishop";
+                    break;
+                case 'K':
+                    piece.image = side + "_" + "knight";
+                    break;
+            }
+
+            this.layout[pos] = piece;
+        }
+    }
+
     move(from, to) {
         this.layout[to] = this.layout[from];
         this.layout[to] = this.layout[from];
@@ -47,6 +85,10 @@ class Board {
         this.layout[to].posY = to.substr(1, 1);
 
         delete this.layout[from];
+    }
+
+    transform(pos, toPiece) {
+        this.layout[pos].image = this.layout[pos].image.substr(0, 3) + toPiece.toLowerCase();
     }
 
     kill(pos) {

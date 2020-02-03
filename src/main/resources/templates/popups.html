@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NON USER DISPLAY</title>
+</head>
+<body>
+
+<div th:fragment="popups(side)">
+<div id="popupBackground"></div>
+
+    <div id="surrenderPopup" class="popup">
+        <span class="close glyphicon glyphicon-remove" onclick="hidePopup('surrenderPopup')"></span>
+        <div class=".title"><h2>Surrender?</h2></div><br/><br/>
+        <p>Are you sure you want to surrender?</p><br/>
+        <div class="choices">
+            <input type="button" value="YES" class="base-input base-button" onclick="surrender()"/>
+        </div>
+    </div>
+    <div id="pawnTransformPopup" class="popup">
+        <span class="close glyphicon glyphicon-remove" onclick="hidePopup('pawnTransformPopup')"></span>
+        <div class=".title"><h2>Select your upgrade:</h2></div><br/><br/>
+        <input type="image" class="upgradePiece" th:src="'/images/' + ${side} + '_knight.png'"    onclick="transformPawnTo('Knight')"/>
+        <input type="image" class="upgradePiece" th:src="'/images/' + ${side} + '_bishop.png'"    onclick="transformPawnTo('Bishop')"/>
+        <input type="image" class="upgradePiece" th:src="'/images/' + ${side} + '_rook.png'"      onclick="transformPawnTo('Rook')"/>
+        <input type="image" class="upgradePiece" th:src="'/images/' + ${side} + '_queen.png'"     onclick="transformPawnTo('Queen')"/>
+    </div>
+</div>
+
+</body>
+</html>

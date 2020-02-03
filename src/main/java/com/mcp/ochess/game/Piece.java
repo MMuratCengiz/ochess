@@ -103,23 +103,26 @@ class Pawn extends Piece {
         int dif = side == Side.White ? 1 : -1;
 
         Position pos = this.getPosition();
+
+        boolean leftValidMove = false;
+        boolean rightValidMove = false;
+
         try {
             Piece threatenLeft  = board.getPiece(new Position(pos.getColumn() - 1, pos.getRow() + dif));
-            Piece threatenRight = board.getPiece(new Position(pos.getColumn() + 1, pos.getRow() + dif));
 
-
-            boolean isLeftThreatened  = threatenLeft != null &&
-                    threatenLeft.getSide() == oppositeSide() &&
+            leftValidMove  = threatenLeft != null && threatenLeft.getSide() == oppositeSide() &&
                     threatenLeft.getPosition().equals(target);
 
-            boolean isRightThreatened = threatenRight != null &&
-                    threatenRight.getSide() == oppositeSide() &&
-                    threatenRight.getPosition().equals(target);
+        } catch (Exception ignored) {/*out of bounds*/}
 
-            return isLeftThreatened || isRightThreatened;
-        } catch (Exception outOfBounds) {
-            return false;
-        }
+        try {
+            Piece threatenRight = board.getPiece(new Position(pos.getColumn() + 1, pos.getRow() + dif));
+
+            rightValidMove = threatenRight != null && threatenRight.getSide() == oppositeSide() &&
+                    threatenRight.getPosition().equals(target);
+        } catch (Exception ignored) {/*out of bounds*/}
+
+        return leftValidMove || rightValidMove;
 
     }
 }
@@ -272,10 +275,14 @@ class King extends Piece {
                 }
             } finally {
                 board.moveToNoCheck(to, position);
+
+                if (pieceAtLoc != null) {
+                    board.placeNoCheck(pieceAtLoc.getPosition(), pieceAtLoc);
+                }
             }
         }
 
-        if (pieceAtLoc != null) {
+        if (pieceAtLoc != null && pieceAtLoc.getSide() == side) {
             return false;
         }
 

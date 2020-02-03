@@ -1,8 +1,8 @@
 body {
-    overflow-x: hidden;
     font-family: 'Oswald', sans-serif !important;
     font-size: 16pt !important;
     background-image: url('/images/bg.png');
+    width: 1920px;
 }
 
 .error {
@@ -25,5 +25,8 @@ body {
     background-color: rgba(0, 0, 0, 1);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1920px) {
+    body {
+        width: 100%;
+    }
 }

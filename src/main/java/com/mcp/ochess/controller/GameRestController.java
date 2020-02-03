@@ -57,6 +57,9 @@ public class GameRestController {
             case PIECE_DOES_NOT_EXIST:
                 result.setActionResult("PieceDoesNotExist");
                 break;
+            case PAWN_TRANSFORM:
+                result.setActionResult("PawnTransform");
+                break;
             case MOVING_OPPONENT_PIECE:
                 result.setActionResult("MovingOpponentPiece");
                 break;

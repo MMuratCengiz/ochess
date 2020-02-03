@@ -13,7 +13,6 @@ let gameSocket;
 let whitePlaying = false;
 let textCountDownSecs = 0.0;
 let textToShow = "";
-
 const imageHeight = 110;
 const squareSize = 130;
 const imageWidth = 63;
@@ -67,7 +66,13 @@ function update(ctx, deltaTime) {
 }
 
 function onLoad() {
-    var client = new SockJS("/ingame/ws");
+    layoutLoad();
+
+    if (lobbyId === null) {
+        return;
+    }
+
+    let client = new SockJS("/ingame/ws");
     gameSocket = Stomp.over(client);
     gameSocket.connect({}, onConnected, onError);
 
@@ -100,6 +105,65 @@ function onLoad() {
     onNextTurn();
 }
 
+function transformPawnTo(to) {
+    gameSocket.send("/app/lobby.ptransform/" + lobbyId, {},
+        JSON.stringify(
+            {
+                transformTo: to
+            }
+        )
+    );
+}
+
+function sendChatMessage(text) {
+    gameSocket.send("/app/lobby.chat/" + lobbyId, {},
+        JSON.stringify(
+            {
+                lobbyId: "" + lobbyId,
+                from: user,
+                message: text
+            }
+        )
+    );
+}
+
+function move(currentMove) {
+    gameSocket.send("/app/lobby.move/" + lobbyId, {},
+        JSON.stringify(
+            {
+                actionType: "MOVE",
+                lobbyId: lobbyId,
+                sender: user,
+                from: currentMove.from,
+                moveId: currentMove.id,
+                to: currentMove.to
+            }
+        )
+    );
+}
+
+function requestBoardLoad() {
+    gameSocket.send("/app/lobby.load/" + lobbyId, {},
+        JSON.stringify(
+            {
+                sender: user,
+            }
+        )
+    );
+}
+
+function surrender() {
+    gameSocket.send("/app/lobby.surrender/" + lobbyId, {},
+        JSON.stringify(
+            {
+                who: user,
+            }
+        )
+    );
+
+    hidePopup("surrenderPopup");
+}
+
 function onNextTurn() {
     whitePlaying = !whitePlaying;
 
@@ -126,23 +190,12 @@ function onMouseUp(e) {
     currentMove.id = lobbyId + ":" + user + ":" + Math.random();
     currentMove.x = holdingPieceCoor.x + 1;
     currentMove.y = holdingPieceCoor.y;
-
-    gameSocket.send("/app/lobby.move", {},
-        JSON.stringify(
-            {
-                actionType: "MOVE",
-                lobbyId: lobbyId,
-                sender: "me",
-                from: currentMove.from,
-                moveId: currentMove.id,
-                to: currentMove.to
-            }
-        )
-    );
+    move(currentMove);
 };
 
 function onConnected() {
-    gameSocket.subscribe("/ingame", onReceive);
+    gameSocket.subscribe("/ingame/" + lobbyId, onReceive);
+    requestBoardLoad();
 }
 
 function onError(err) {
@@ -159,6 +212,29 @@ function onReceive(payload) {
     if (message.type === "NoOpponent") {
         showText("No opponent!");
     }
+
+    if (message.type === "OpponentConnected") {
+        document.getElementById("blackPlayer").innerHTML = message.who;
+    }
+
+    if (message.type === "Chat") {
+        addMessage(message.from, message.message);
+    }
+
+    if (message.type === "GameOver") {
+        endGame(message.reason);
+    }
+
+    if (message.type === "Load" && message.sender == user) {
+        board.load(message.board);
+    }
+
+    if (message.type === "PawnTransform") {
+        if (message.actionResult == "Transformed") {
+            board.transform(message.transformPos, message.newPieceType);
+            hidePopup("pawnTransformPopup");
+        }
+    }
 }
 
 function onMoveResultReceived(message) {
@@ -168,7 +244,7 @@ function onMoveResultReceived(message) {
         showText("Not your turn!");
     } else if (message.actionResult === "InvalidMoveKingThreatened") {
         showText("Your king is in danger!");
-    }  else if (message.actionResult === "MovingOpponentPiece") {
+    } else if (message.actionResult === "MovingOpponentPiece") {
         showText("That's not yours!");
     } else {
         board.move(message.from, message.to);
@@ -187,8 +263,18 @@ function onMoveResultReceived(message) {
             showText("Checkmate");
         }
 
+        if (message.actionResult === "PawnTransform" && message.sender == user) {
+            showPopup("pawnTransformPopup");
+        }
+
         onNextTurn();
     }
+}
+
+function endGame() {
+    setTimeout(function() {
+        location.href = "/gameover";
+    }, 10000);
 }
 
 function handleCastling(message) {

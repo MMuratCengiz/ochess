@@ -6,7 +6,7 @@
     <th:fragment th:replace="ref :: referrence"></th:fragment>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        let lobbyId = /*[[${lobbyId}]]*/ 0;
+        let lobbyId = /*[[${lobbyId}]]*/ null;
         let user = /*[[${User.getName()}]]*/ 0;
         /*]]>*/
     </script>
@@ -15,7 +15,7 @@
     <script th:src="@{/js/game.js}" type="application/javascript"></script>
     <link th:href="@{/css/gamev2.css}" rel="stylesheet" type="text/css" />
 </head>
-<body onload="onLoad()">
+<body onload="onLoad()" onkeypress="bodyKeyPress()">
 <div id="topBar">
     <div class="tbContainer">
         <h1 style="float: left; font-size: 48pt">
@@ -40,8 +40,9 @@
 
 
         <a
+                onclick="showPopup('surrenderPopup')"
                 onmouseenter="showNav('SURRENDER')"
-                onmouseleave="hideNav()" th:if="${ingame}" th:href="@{/surrender}">
+                onmouseleave="hideNav()" th:if="${ingame}">
         <span
                 class="glyphicon glyphicon-remove-circle"
                 aria-hidden="true">
@@ -86,24 +87,24 @@
             <th></th>
         </tr>
         </thead>
-        <th:block th:each="lobby: ${lobbies}">
+        <th:block th:each="l: ${lobbies}">
             <tr>
-                <td th:utext="${lobby.getId()}"></td>
-                <td th:utext="${lobby.getCreatedDate().toGMTString()}"></td>
-                <td th:utext="${lobby.getName()}"></td>
-                <td th:utext="${lobby.getType() == 1 ? 'Normal' : 'Ranked'}"></td>
+                <td th:utext="${l.getId()}"></td>
+                <td th:utext="${l.getCreatedDate().toGMTString()}"></td>
+                <td th:utext="${l.getName()}"></td>
+                <td th:utext="${l.getType() == 1 ? 'Normal' : 'Ranked'}"></td>
 
-                <td th:utext="${lobby.getBlackUser() == null && lobby.getWhiteUser() == null ? '0/2'
-                        : (lobby.getWhiteUser() != null && lobby.getBlackUser() != null ? '2/2' : '1/2') }"></td>
+                <td th:utext="${l.getBlackUser() == null && l.getWhiteUser() == null ? '0/2'
+                        : (l.getWhiteUser() != null && l.getBlackUser() != null ? '2/2' : '1/2') }"></td>
                 <form th:action="@{/join}" th:method="POST" th:object="${lobby}">
                     <td>
                         <input type="password" class="base-input" name="password" placeholder="Lobby password..."
-                               th:if="${lobby.getPassword() != null}">
-                        <span th:if="${lobby.getPassword() == null}">No password</span>
-                        <span class="error" th:if="${error.length() > 0 && lobby.getId() == errorLobbyId}" th:utext="${error}"></span>
+                               th:if="${l.getPassword() != null}">
+                        <span th:if="${l.getPassword() == null}">No password</span>
+                        <span class="error" th:if="${error.length() > 0 && l.getId() == errorLobbyId}" th:utext="${error}"></span>
                     </td>
                     <td>
-                        <input type="hidden" name="id" th:value="${lobby.getId()}" />
+                        <input type="hidden" name="id" th:value="${l.getId()}" />
                         <button class="base-input base-button" type="submit" th:field="*{id}" th:text="JOIN"></button>
                     </td>
                 </form>
@@ -151,5 +152,13 @@
         <p>plain html support coming never</p>
     </canvas>
 </div>
+<div id="gameChat" th:if="${ingame}">
+    <div id="messages">
+<!--        Automatically generated. -->
+    </div>
+    <input type="text" placeholder="Press any key to chat.." id="messageInput" on/>
+</div>
+
+<div th:replace="popups :: popups(${side})"></div>
 </body>
 </html>

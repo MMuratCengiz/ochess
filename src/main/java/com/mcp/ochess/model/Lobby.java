@@ -6,6 +6,9 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "lobbies")
 public class Lobby {
+    public static final int LOBBY_TIME_NORMAL = 1;
+    public static final int LOBBY_TYPE_RANKED = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

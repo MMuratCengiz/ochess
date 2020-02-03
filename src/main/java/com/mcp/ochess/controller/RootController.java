@@ -1,8 +1,7 @@
 package com.mcp.ochess.controller;
 
-import ch.qos.logback.classic.gaffer.AppenderDelegate;
-import com.mcp.ochess.dao.LobbyDao;
-import com.mcp.ochess.dao.OChessUserDetailsService;
+import com.mcp.ochess.dao.LobbyService;
+import com.mcp.ochess.dao.UserPlayerService;
 import com.mcp.ochess.exceptions.OChessBaseException;
 import com.mcp.ochess.game.Game;
 import com.mcp.ochess.model.Lobby;
@@ -21,23 +20,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpSession;
-import javax.swing.text.Utilities;
 import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/")
 public class RootController {
-    OChessUserDetailsService userService;
     private PasswordEncoder passwordEncoder;
-    private LobbyDao lobbyDao;
+    private LobbyService lobbyService;
+    private UserPlayerService userService;
 
     @Autowired
-    public void setLobbyDao(LobbyDao lobbyDao) {
-        this.lobbyDao = lobbyDao;
+    public void setLobbyService(LobbyService lobbyService) {
+        this.lobbyService = lobbyService;
     }
 
     @Autowired
-    public void setUserService(OChessUserDetailsService userService) {
+    public void setUserService(UserPlayerService userService) {
         this.userService = userService;
     }
 
@@ -68,7 +66,7 @@ public class RootController {
         model.addAttribute("search", search);
         model.addAttribute("page", page);
         model.addAttribute("limit", limit);
-        model.addAttribute("lobbies", lobbyDao.listLobbies(limit, page, search));
+        model.addAttribute("lobbies", lobbyService.listLobbies(search, limit, page));
         model.addAttribute("lobby", new Lobby());
         model.addAttribute("error", "");
         if (request.getParameter("error") != null) {
@@ -76,13 +74,14 @@ public class RootController {
             model.addAttribute("errorLobbyId", errorLobbyId);
             model.addAttribute("error", request.getParameter("error"));
         }
+
         return "lobby";
     }
 
     @PostMapping("/lobby")
     public String createLobby(@Valid @ModelAttribute("Lobby") Lobby lobby, Model model, Errors errors, HttpSession session) throws OChessBaseException {
         initModel(model, session);
-        lobbyDao.saveLobby(lobby);
+        lobbyService.newLobby(lobby);
 
         if (errors == null) {
             Game.createNewGame(lobby.getId());
@@ -98,7 +97,7 @@ public class RootController {
         initModel(model, session);
 
         int joinId = lobby.getId();
-        lobby = lobbyDao.getLobby(joinId, lobby.getPassword());
+        lobby = lobbyService.getLobby(joinId, lobby.getPassword());
 
         if (lobby == null) {
             model.addAttribute("error", "Invalid password!");
@@ -117,9 +116,10 @@ public class RootController {
             model.addAttribute("errorLobbyId", lobby.getId());
         }
 
-        lobbyDao.updateLobby(lobby);
-        userService.getDao().updatePlayer(user.getPlayer());
+        lobbyService.save(lobby);
         user.getPlayer().setInGameLobby(lobby);
+        userService.updatePlayer(user.getPlayer());
+        userService.updateUser(user);
 
         if (errors == null) {
             model.addAttribute("error", "");
@@ -144,6 +144,11 @@ public class RootController {
 
     @GetMapping("/loginsuccess")
     public String loginSuccess() {
+        return "redirect:/gamev2";
+    }
+
+    @GetMapping("/gameover")
+    public String gameOver() {
         return "redirect:/gamev2";
     }
 
@@ -197,7 +202,7 @@ public class RootController {
             errors.rejectValue("password", "400", "Passwords must match!");
         } else if (! errors.hasErrors()) {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            userService.storeUser(user);
+            userService.newUser(user);
         }
 
         return "register";
@@ -215,6 +220,7 @@ public class RootController {
 
     public void initModel(Model m, HttpSession session) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        user = userService.loadUserByUsername(user.getName()); // refresh to get updated lobby
 
         m.addAttribute("User", user);
         m.addAttribute("LoggedPlayer", user.getPlayer());
@@ -223,6 +229,10 @@ public class RootController {
             m.addAttribute("ingame", true);
             m.addAttribute("lobbyId", user.getPlayer().getInGameLobby().getId());
             m.addAttribute("lobby", user.getPlayer().getInGameLobby());
+
+            int whiteId = user.getPlayer().getInGameLobby().getWhiteUser().getId();
+
+            m.addAttribute("side", whiteId == user.getId() ? "wh" : "bl");
         }
     }
 }

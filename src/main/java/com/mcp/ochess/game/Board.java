@@ -2,8 +2,7 @@ package com.mcp.ochess.game;
 
 import com.mcp.ochess.exceptions.OChessBaseException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 public class Board {
     private HashMap<Position, Piece> layout = new HashMap<>();
@@ -19,7 +18,8 @@ public class Board {
     private boolean blackKingMoved = false;
     private boolean blackLeftRookMoved = false;
     private boolean blackRightRookMoved = false;
-    private boolean awaitingPawnTransform = false;
+    private Position awaitingPawnTransform = null;
+    private Side awaitingPawnTransformSide;
 
     // En passant enabled boxes use class for better readability
     private ArrayList<EnPassantDesc> enPassantEnabledPositions = new ArrayList<>();
@@ -80,7 +80,7 @@ public class Board {
     }
 
     public MoveResultStatus move(Position from, Position to) throws OChessBaseException {
-        if (awaitingPawnTransform) {
+        if (awaitingPawnTransform != null) {
             throw new OChessBaseException("Transform the pawn before continuing to move.");
         }
 
@@ -142,7 +142,8 @@ public class Board {
                 (piece.getSide() == Side.Black && piece.getPosition().getRow() == 1) || // black reaches 1st row
                         (piece.getSide() == Side.White && piece.getPosition().getRow() == 8) // white reaches 8th row
         )) {
-            awaitingPawnTransform = true;
+            awaitingPawnTransform = piece.getPosition();
+            awaitingPawnTransformSide = piece.getSide();
             return MoveResultStatus.PAWN_TRANSFORM;
         }
 
@@ -254,33 +255,53 @@ public class Board {
         return false;
     }
 
-    public void transformPawn(Position pawnPos, PieceKind transformTo) throws OChessBaseException {
-        if (! awaitingPawnTransform) {
-            throw new OChessBaseException("Invalid transform call.");
+    public PawnTransformStatus transformPawn(PieceKind transformTo, Side side) throws OChessBaseException {
+        if (awaitingPawnTransform == null) {
+            return PawnTransformStatus.NO_PAWN_WAITING_TRANSFORM;
         }
 
-        Side side = layout.get(pawnPos).getSide();
+        if (side != awaitingPawnTransformSide) {
+            return PawnTransformStatus.OPPONENT_PIECE;
+        }
 
         switch (transformTo) {
             case Pawn:
-                throw new OChessBaseException("Stupid transform.");
+            case King:
+                return PawnTransformStatus.INVALID_TRANSFORM;
             case Rook:
                 // why
-                layout.put(pawnPos, Piece.createRook(this, pawnPos, side));
+                layout.put(awaitingPawnTransform, Piece.createRook(this, awaitingPawnTransform, side));
                 break;
             case Knight:
-                layout.put(pawnPos, Piece.createKnight(this, pawnPos, side));
+                layout.put(awaitingPawnTransform, Piece.createKnight(this, awaitingPawnTransform, side));
                 break;
             case Bishop:
                 // why
-                layout.put(pawnPos, Piece.createBishop(this, pawnPos, side));
+                layout.put(awaitingPawnTransform, Piece.createBishop(this, awaitingPawnTransform, side));
                 break;
             case Queen:
-                layout.put(pawnPos, Piece.createQueen(this, pawnPos, side));
+                layout.put(awaitingPawnTransform, Piece.createQueen(this, awaitingPawnTransform, side));
                 break;
-            case King:
-                throw new OChessBaseException("Very funny.");
         }
+
+        awaitingPawnTransform = null;
+        awaitingPawnTransformSide = null;
+
+        if (tryCheckMate(opposite(side))) {
+            return PawnTransformStatus.CHECKMATE;
+        }
+
+        Piece oppositeKing = side == Side.White ? blackKing : whiteKing;
+
+        if (isCellThreatened(oppositeKing.getPosition(), side)) {
+            return PawnTransformStatus.CHECK;
+        }
+
+        return PawnTransformStatus.TRANSFORMED;
+    }
+
+    public Position pieceWaitingTransform() {
+        return awaitingPawnTransform;
     }
 
     private boolean checkCastlingPossible(Position from, Position to) throws OChessBaseException {
@@ -483,6 +504,58 @@ public class Board {
     public void moveToNoCheck(Position from, Position to) {
         this.layout.put(to, layout.get(from));
         this.layout.remove(from);
+    }
+
+    // Risky use with caution
+    public void placeNoCheck(Position pos, Piece piece) {
+        this.layout.put(pos, piece);
+    }
+
+    /*
+    Marshall format
+    Single position is represented like so:
+    Position|Side|PieceLetter ie. A1BK
+    The king is noted as X
+    No spaces or delimiters.
+     */
+    public String marshall() {
+        StringBuilder result = new StringBuilder();
+
+        Iterator<Map.Entry<Position, Piece>> en = layout.entrySet().iterator();
+
+        while (en.hasNext()) {
+            Map.Entry<Position, Piece> tuple = en.next();
+
+            Piece piece = tuple.getValue();
+
+            if (piece != null) { // possible on a dead cell
+                result.append(tuple.getKey().toString());
+                result.append(piece.getSide() == Side.White ? 'W' : 'B');
+
+                switch (piece.getKind()) {
+                    case Pawn:
+                        result.append("P");
+                        break;
+                    case Rook:
+                        result.append("R");
+                        break;
+                    case Knight:
+                        result.append("K");
+                        break;
+                    case Bishop:
+                        result.append("B");
+                        break;
+                    case Queen:
+                        result.append("Q");
+                        break;
+                    case King:
+                        result.append("X");
+                        break;
+                }
+            }
+        }
+
+        return result.toString();
     }
 
     // TESTING

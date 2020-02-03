@@ -344,4 +344,40 @@ public class PiecesTest extends TestCase {
 
         assertEquals(MoveResultStatus.CHECKMATE, status);
     }
+
+    @Test
+    public void testCheckMate2() throws OChessBaseException {
+        Board board = new Board();
+
+        board.move(Position.fromString("E2"), Position.fromString("E4"));
+        board.move(Position.fromString("E7"), Position.fromString("E5"));
+
+        board.move(Position.fromString("D1"), Position.fromString("F3"));
+        board.move(Position.fromString("A7"), Position.fromString("A6"));
+
+        board.move(Position.fromString("F1"), Position.fromString("C4"));
+        board.move(Position.fromString("A6"), Position.fromString("A5"));
+
+        MoveResultStatus status = board.move(Position.fromString("F3"), Position.fromString("F7"));
+
+
+        assertEquals(MoveResultStatus.CHECKMATE, status);
+    }
+
+    @Test
+    public void testCheckOnly() throws OChessBaseException {
+        Board board = new Board();
+
+        board.move(Position.fromString("E2"), Position.fromString("E4"));
+        board.move(Position.fromString("E7"), Position.fromString("E5"));
+
+        board.move(Position.fromString("D1"), Position.fromString("F3"));
+        board.move(Position.fromString("A7"), Position.fromString("A6"));
+
+        board.move(Position.fromString("F1"), Position.fromString("B5"));
+        board.move(Position.fromString("A6"), Position.fromString("A5"));
+
+        MoveResultStatus status = board.move(Position.fromString("F3"), Position.fromString("F7"));
+        assertEquals(MoveResultStatus.CHECK, status);
+    }
 }

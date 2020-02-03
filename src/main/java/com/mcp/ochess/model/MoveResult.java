@@ -7,6 +7,7 @@ public class MoveResult extends ActionResult {
     private String from;
     private String to;
     private String kill;
+    private String sender;
 
     public MoveResult() {
         super("MoveResult");
@@ -48,6 +49,10 @@ public class MoveResult extends ActionResult {
         return to;
     }
 
+    public String getSender() {
+        return sender;
+    }
+
     public String getKill() {
         return kill;
     }
@@ -58,5 +63,9 @@ public class MoveResult extends ActionResult {
 
     public void setKill(String kill) {
         this.kill = kill;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 }
